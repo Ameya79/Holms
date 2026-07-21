@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import OceanWaves from "@/components/OceanWaves";
+import Logo from "@/components/Logo";
 import FeatureSection from "@/components/ui/stack-feature-section";
+import UseCasesVisual from "@/components/UseCasesVisual";
 import { Button } from "@/components/ui/button";
 import { FaGithub } from "react-icons/fa";
 import { Download, ArrowRight } from "lucide-react";
@@ -32,18 +32,12 @@ export default function LandingPage() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col bg-sand text-ink selection:bg-match selection:text-ink">
+    <main className="min-h-screen flex flex-col bg-sand text-ink selection:bg-match selection:text-ink font-sans">
       {/* Navigation Header */}
       <header className="max-w-6xl mx-auto w-full px-6 py-6 flex items-center justify-between z-20">
         <div className="flex items-center gap-3">
-          <Image
-            src="/logo.png"
-            alt="Holms Logomark"
-            width={40}
-            height={40}
-            className="rounded-lg shadow-sm border border-teal/20 object-cover"
-          />
-          <span className="font-serif text-2xl text-teal tracking-wide font-normal">
+          <Logo size={32} />
+          <span className="font-serif text-2xl text-teal tracking-tight font-semibold">
             Holms
           </span>
         </div>
@@ -66,89 +60,74 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative pt-12 pb-24 flex flex-col items-center justify-center text-center px-6 overflow-hidden">
-        {/* Brand Logomark Badge */}
-        <div className="mb-6 relative group">
-          <div className="absolute -inset-1 bg-gradient-to-r from-teal to-drift rounded-2xl blur-sm opacity-30 group-hover:opacity-60 transition duration-500"></div>
-          <Image
-            src="/logo.png"
-            alt="Holms Brand Logo"
-            width={120}
-            height={120}
-            priority
-            className="relative rounded-2xl shadow-md border-2 border-teal/30 object-cover bg-foam"
-          />
+      <section className="relative pt-8 pb-12 flex flex-col items-center justify-center text-center px-6 overflow-hidden">
+        <div className="mb-4">
+          <span className="text-xs font-semibold text-teal bg-teal/10 px-3 py-1 rounded-full border border-teal/15">
+            Self-Hosted · Local-First · Single-Tenant
+          </span>
         </div>
 
-        <h1 className="font-serif text-5xl sm:text-7xl text-teal tracking-wide mb-4 max-w-3xl leading-[1.1]">
+        <h1 className="font-serif text-5xl sm:text-7xl text-teal tracking-tight mb-4 max-w-3xl leading-[1.08]">
           Your documents. <br />
           <span className="italic font-light">Your island.</span>
         </h1>
 
-        <p className="text-muted text-lg sm:text-xl max-w-xl mb-10 leading-relaxed">
-          Local-first, self-hosted personal document search. OCR scanned notices, search by meaning in SQLite, and verify with your own AI key.
+        <p className="text-muted text-base sm:text-lg max-w-xl mb-8 leading-relaxed">
+          Search PDFs, DOCX, and scanned notices locally with zero API key required. Connect Claude, GPT, Gemini, or Groq for grounded AI answers.
         </p>
 
-        <div className="flex flex-col sm:flex-row items-center gap-4 z-20">
-          <Button size="lg" variant="secondary" onClick={handleInstall} className="shadow-md text-base px-8 py-6">
-            <Download className="mr-2 h-5 w-5" />
+        <div className="flex flex-col sm:flex-row items-center gap-3 z-20 mb-12">
+          <Button size="lg" variant="secondary" onClick={handleInstall} className="shadow-xs text-sm px-7 py-5">
+            <Download className="mr-2 h-4 w-4" />
             Install Holms App
           </Button>
-          <Button size="lg" variant="outline" asChild className="text-base px-8 py-6">
+          <Button size="lg" variant="outline" asChild className="text-sm px-7 py-5">
             <Link href="/app">
-              Launch Web Interface <ArrowRight className="ml-2 h-5 w-5" />
+              Launch Search Interface <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
         </div>
 
-        <p className="text-muted text-xs mt-4">Works natively on macOS, Windows, Linux</p>
-
-        {/* Shore & Ocean Waves Animation */}
-        <div className="w-full mt-12">
-          <OceanWaves />
+        {/* Feature Component (Stack Feature Section in Hero) */}
+        <div className="w-full max-w-6xl">
+          <FeatureSection />
         </div>
       </section>
 
       {/* Value Strip */}
-      <div className="bg-foam border-y border-teal/15 py-6 px-6">
-        <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-center gap-6 text-teal font-medium text-sm sm:text-base text-center">
+      <div className="bg-foam border-y border-teal/15 py-5 px-6">
+        <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-center gap-6 text-teal font-medium text-xs sm:text-sm text-center">
           <span className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-drift"></span>
+            <span className="w-1.5 h-1.5 rounded-full bg-drift"></span>
             Search what's yours
           </span>
           <span className="text-drift/40 hidden sm:inline">•</span>
           <span className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-teal"></span>
+            <span className="w-1.5 h-1.5 rounded-full bg-teal"></span>
             Works without an API key
           </span>
           <span className="text-drift/40 hidden sm:inline">•</span>
           <span className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-drift"></span>
+            <span className="w-1.5 h-1.5 rounded-full bg-drift"></span>
             Nothing leaves your machine
           </span>
         </div>
       </div>
 
-      {/* Interactive Stack Feature Section (Stack-Feature Component) */}
-      <div className="px-6">
-        <FeatureSection />
-      </div>
+      {/* Visual Use Cases Section */}
+      <UseCasesVisual />
 
       {/* Sand Section Footer */}
-      <footer className="bg-[#D9CDB5] border-t border-teal/20 py-16 px-6 text-teal">
-        <div className="max-w-2xl mx-auto text-center">
-          <Image
-            src="/logo.png"
-            alt="Holms Logo"
-            width={48}
-            height={48}
-            className="mx-auto rounded-xl border border-teal/30 mb-4 shadow-sm"
-          />
-          <h3 className="font-serif text-2xl text-teal mb-3">Holms</h3>
-          <p className="text-sm leading-relaxed text-ink/90 mb-6">
+      <footer className="bg-[#D9CDB5] border-t border-teal/20 py-12 px-6 text-teal">
+        <div className="max-w-xl mx-auto text-center">
+          <div className="flex justify-center mb-3">
+            <Logo size={36} />
+          </div>
+          <h3 className="font-serif text-2xl text-teal mb-2">Holms</h3>
+          <p className="text-xs leading-relaxed text-ink/90 mb-6">
             A single-tenant local document search engine. Indexes PDFs, DOCX files, and scanned images locally into SQLite index using fastembed and FTS5 BM25 search.
           </p>
-          <div className="flex items-center justify-center gap-6 text-sm font-semibold">
+          <div className="flex items-center justify-center gap-6 text-xs font-semibold">
             <Link href="/app" className="text-teal hover:text-drift underline underline-offset-4">
               Open Search App
             </Link>
@@ -158,7 +137,7 @@ export default function LandingPage() {
               rel="noopener noreferrer"
               className="text-teal hover:text-drift underline underline-offset-4 flex items-center gap-1.5"
             >
-              <FaGithub className="h-4 w-4" /> GitHub Repository
+              <FaGithub className="h-3.5 w-3.5" /> GitHub Repository
             </a>
           </div>
         </div>

@@ -5,7 +5,6 @@ import {
   Search,
   UploadCloud,
   Settings,
-  FileText,
 } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
 import Link from "next/link";
@@ -14,18 +13,17 @@ import { Dock, DockIcon, DockItem, DockLabel } from "@/components/ui/dock";
 interface Props {
   onOpenSettings: () => void;
   onOpenUpload: () => void;
-  docCount?: number | null;
 }
 
-export default function AppDock({ onOpenSettings, onOpenUpload, docCount }: Props) {
+export default function AppDock({ onOpenSettings, onOpenUpload }: Props) {
   return (
-    <div className="fixed bottom-3 left-1/2 -translate-x-1/2 z-40 max-w-full">
-      <Dock className="items-end pb-2">
+    <div className="flex justify-center w-full my-2">
+      <Dock className="items-center bg-foam/90 backdrop-blur-md border border-teal/20 rounded-full shadow-sm px-3 py-1">
         <DockItem onClick={() => {}}>
           <Link href="/" className="w-full h-full flex items-center justify-center">
             <DockLabel>Landing</DockLabel>
             <DockIcon>
-              <Home className="h-5 w-5 text-teal" />
+              <Home className="h-4 w-4 text-teal" />
             </DockIcon>
           </Link>
         </DockItem>
@@ -34,7 +32,7 @@ export default function AppDock({ onOpenSettings, onOpenUpload, docCount }: Prop
           <Link href="/app" className="w-full h-full flex items-center justify-center">
             <DockLabel>Search</DockLabel>
             <DockIcon>
-              <Search className="h-5 w-5 text-teal" />
+              <Search className="h-4 w-4 text-teal" />
             </DockIcon>
           </Link>
         </DockItem>
@@ -42,14 +40,14 @@ export default function AppDock({ onOpenSettings, onOpenUpload, docCount }: Prop
         <DockItem onClick={onOpenUpload}>
           <DockLabel>Upload Doc</DockLabel>
           <DockIcon>
-            <UploadCloud className="h-5 w-5 text-drift" />
+            <UploadCloud className="h-4 w-4 text-drift" />
           </DockIcon>
         </DockItem>
 
         <DockItem onClick={onOpenSettings}>
           <DockLabel>Settings</DockLabel>
           <DockIcon>
-            <Settings className="h-5 w-5 text-teal" />
+            <Settings className="h-4 w-4 text-teal" />
           </DockIcon>
         </DockItem>
 
@@ -62,7 +60,7 @@ export default function AppDock({ onOpenSettings, onOpenUpload, docCount }: Prop
           >
             <DockLabel>GitHub</DockLabel>
             <DockIcon>
-              <FaGithub className="h-5 w-5 text-teal" />
+              <FaGithub className="h-4 w-4 text-teal" />
             </DockIcon>
           </a>
         </DockItem>

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
+import Logo from "@/components/Logo";
 import SearchBox from "@/components/SearchBox";
 import DocumentGrid from "@/components/DocumentGrid";
 import AnswerBox from "@/components/AnswerBox";
@@ -55,18 +55,12 @@ export default function SearchAppPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-sand text-ink relative">
-      {/* Top Header with Brand Logomark */}
+    <div className="flex flex-col h-screen overflow-hidden bg-sand text-ink relative font-sans">
+      {/* Header */}
       <header className="flex items-center justify-between px-6 py-4 bg-transparent shrink-0">
-        <Link href="/" className="flex items-center gap-3 no-underline">
-          <Image
-            src="/logo.png"
-            alt="Holms Logomark"
-            width={32}
-            height={32}
-            className="rounded-lg border border-teal/20 shadow-xs object-cover"
-          />
-          <h1 className="font-serif text-2xl font-normal text-teal tracking-wide">
+        <Link href="/" className="flex items-center gap-2.5 no-underline">
+          <Logo size={28} />
+          <h1 className="font-serif text-2xl font-semibold text-teal tracking-tight">
             Holms
           </h1>
         </Link>
@@ -75,7 +69,7 @@ export default function SearchAppPage() {
           <button
             onClick={() => setIsSettingsOpen(true)}
             title="Settings"
-            className="inline-flex items-center justify-center w-9 h-9 border border-teal/20 bg-foam text-teal rounded-md hover:bg-teal hover:text-white transition-colors cursor-pointer"
+            className="inline-flex items-center justify-center w-9 h-9 border border-teal/20 bg-foam text-teal rounded-lg hover:bg-teal hover:text-white transition-colors cursor-pointer"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="3" />
@@ -86,7 +80,7 @@ export default function SearchAppPage() {
       </header>
 
       {/* Main Search Body */}
-      <main className="flex-1 flex flex-col items-center overflow-y-auto px-6 pb-28">
+      <main className="flex-1 flex flex-col items-center overflow-y-auto px-6 pb-6">
         <SearchBox
           onSearch={handleSearch}
           loading={loading}
@@ -94,7 +88,7 @@ export default function SearchAppPage() {
         />
 
         {hasSearched && (
-          <div className="w-full max-w-3xl flex flex-col gap-4 animate-fade-in">
+          <div className="w-full max-w-3xl flex flex-col gap-4 animate-fade-in mb-6">
             {statusMsg && (
               <p className="text-xs text-muted mb-1">{statusMsg}</p>
             )}
@@ -106,17 +100,14 @@ export default function SearchAppPage() {
         )}
       </main>
 
-      {/* Bottom Upload Bar */}
-      <div className="mb-14">
+      {/* Bottom Container: Clean Dock + Upload Zone */}
+      <div className="flex flex-col items-center bg-foam border-t border-teal/15 pt-2">
+        <AppDock
+          onOpenSettings={() => setIsSettingsOpen(true)}
+          onOpenUpload={triggerUploadClick}
+        />
         <UploadZone />
       </div>
-
-      {/* Floating Apple-Style Dock Component */}
-      <AppDock
-        onOpenSettings={() => setIsSettingsOpen(true)}
-        onOpenUpload={triggerUploadClick}
-        docCount={documents.length}
-      />
 
       {/* Settings Modal */}
       <SettingsModal
