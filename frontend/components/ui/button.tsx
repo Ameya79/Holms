@@ -5,21 +5,21 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer shadow-xs",
   {
     variants: {
       variant: {
-        default: "bg-emerald-600 text-white hover:bg-emerald-500",
-        destructive: "bg-red-600 text-white hover:bg-red-500",
-        outline: "border border-neutral-800 bg-neutral-900 text-neutral-200 hover:bg-neutral-800 hover:text-white",
-        secondary: "bg-white text-black hover:bg-neutral-200 font-semibold",
-        ghost: "hover:bg-neutral-900 text-neutral-300 hover:text-white",
-        link: "text-emerald-400 underline-offset-4 hover:underline",
+        default: "bg-teal text-foam hover:bg-[#153835]",
+        destructive: "bg-red-700 text-white hover:bg-red-800",
+        outline: "border border-teal/25 bg-foam text-teal hover:bg-teal/10",
+        secondary: "bg-drift text-white hover:bg-[#725740] font-semibold",
+        ghost: "hover:bg-teal/10 text-teal",
+        link: "text-teal underline-offset-4 hover:underline",
       },
       size: {
         default: "h-10 px-4 py-2",
-        sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-11 rounded-lg px-8 text-base",
+        sm: "h-8 rounded-lg px-3 text-xs",
+        lg: "h-11 rounded-xl px-7 text-sm",
         icon: "h-9 w-9",
       },
     },

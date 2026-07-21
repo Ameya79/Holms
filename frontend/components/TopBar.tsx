@@ -37,13 +37,13 @@ export default function TopBar({ onOpenSettings, onOpenUpload }: Props) {
   };
 
   return (
-    <header className="flex items-center justify-between px-6 py-4 border-b border-neutral-900 bg-neutral-950/80 backdrop-blur-md shrink-0">
+    <header className="flex items-center justify-between px-6 py-4 border-b border-teal/15 bg-sand/90 backdrop-blur-md shrink-0">
       <Link href="/" className="flex items-center gap-2.5 no-underline">
-        <Logo size={28} />
-        <span className="font-sans text-lg font-bold tracking-tight text-white">
+        <Logo size={32} />
+        <span className="font-serif text-xl font-bold tracking-tight text-teal">
           Holms
         </span>
-        <span className="text-[11px] font-mono text-neutral-400 bg-neutral-900 border border-neutral-800 px-2 py-0.5 rounded-full ml-1">
+        <span className="text-[11px] font-mono text-drift bg-foam border border-teal/15 px-2 py-0.5 rounded-full ml-1 font-medium">
           {docCount !== null ? `${docCount} docs` : "Offline"}
         </span>
       </Link>
@@ -51,7 +51,7 @@ export default function TopBar({ onOpenSettings, onOpenUpload }: Props) {
       <div className="flex items-center gap-2">
         <button
           onClick={onOpenUpload}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600/90 text-white text-xs font-medium rounded-lg hover:bg-emerald-500 transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-teal text-foam text-xs font-semibold rounded-xl hover:bg-[#153835] transition-colors cursor-pointer shadow-xs"
         >
           <Plus className="h-3.5 w-3.5" /> Upload File
         </button>
@@ -59,7 +59,7 @@ export default function TopBar({ onOpenSettings, onOpenUpload }: Props) {
         {installPrompt && (
           <button
             onClick={handleInstall}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900 border border-neutral-800 text-neutral-200 text-xs font-medium rounded-lg hover:bg-neutral-800 hover:text-white transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-foam border border-teal/20 text-teal text-xs font-medium rounded-xl hover:bg-teal/10 transition-colors cursor-pointer"
           >
             <Download className="h-3.5 w-3.5" /> Install
           </button>
@@ -69,7 +69,7 @@ export default function TopBar({ onOpenSettings, onOpenUpload }: Props) {
           href="https://github.com/Ameya79/Holms.git"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center w-8 h-8 border border-neutral-800 bg-neutral-900 text-neutral-400 hover:text-white rounded-lg transition-colors"
+          className="inline-flex items-center justify-center w-8 h-8 border border-teal/20 bg-foam text-teal hover:bg-teal/10 rounded-xl transition-colors"
           title="GitHub Source"
         >
           <FaGithub className="h-4 w-4" />
@@ -78,7 +78,7 @@ export default function TopBar({ onOpenSettings, onOpenUpload }: Props) {
         <button
           onClick={onOpenSettings}
           title="Settings"
-          className="inline-flex items-center justify-center w-8 h-8 border border-neutral-800 bg-neutral-900 text-neutral-400 hover:text-white rounded-lg transition-colors cursor-pointer"
+          className="inline-flex items-center justify-center w-8 h-8 border border-teal/20 bg-foam text-teal hover:bg-teal/10 rounded-xl transition-colors cursor-pointer"
         >
           <Settings className="h-4 w-4" />
         </button>

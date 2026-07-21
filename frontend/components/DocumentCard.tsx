@@ -1,5 +1,5 @@
 "use client";
-import { FileText, Download, ExternalLink } from "lucide-react";
+import { FileText, ExternalLink } from "lucide-react";
 
 export interface DocResult {
   doc_id: string;
@@ -15,15 +15,15 @@ export default function DocumentCard({ doc, query }: { doc: DocResult; query: st
   const getBadgeColor = (type: string) => {
     switch (type.toLowerCase()) {
       case "pdf":
-        return "bg-red-950/80 text-red-300 border-red-900/50";
+        return "bg-red-100 text-red-800 border-red-200";
       case "docx":
-        return "bg-blue-950/80 text-blue-300 border-blue-900/50";
+        return "bg-blue-100 text-blue-800 border-blue-200";
       case "png":
       case "jpg":
       case "jpeg":
-        return "bg-amber-950/80 text-amber-300 border-amber-900/50";
+        return "bg-amber-100 text-amber-800 border-amber-200";
       default:
-        return "bg-neutral-800 text-neutral-300 border-neutral-700";
+        return "bg-teal/10 text-teal border-teal/20";
     }
   };
 
@@ -34,12 +34,12 @@ export default function DocumentCard({ doc, query }: { doc: DocResult; query: st
   };
 
   return (
-    <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-5 flex flex-col justify-between hover:border-neutral-700 transition-all shadow-sm">
+    <div className="bg-foam border border-teal/20 rounded-2xl p-5 flex flex-col justify-between hover:border-teal/40 transition-all shadow-xs">
       <div>
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex items-center gap-2.5 min-w-0">
-            <FileText className="h-5 w-5 text-emerald-400 shrink-0" />
-            <h3 className="font-semibold text-white text-base truncate" title={doc.filename}>
+            <FileText className="h-5 w-5 text-teal shrink-0" />
+            <h3 className="font-semibold text-teal text-base truncate" title={doc.filename}>
               {doc.filename}
             </h3>
           </div>
@@ -49,7 +49,7 @@ export default function DocumentCard({ doc, query }: { doc: DocResult; query: st
         </div>
 
         {/* Snippet box */}
-        <div className="bg-neutral-950 border border-neutral-800/80 rounded-lg p-3 my-3 text-xs text-neutral-300 font-sans leading-relaxed">
+        <div className="bg-sand/70 border border-teal/15 rounded-xl p-3 my-3 text-xs text-ink/90 font-sans leading-relaxed">
           <span
             dangerouslySetInnerHTML={{
               __html: doc.top_snippet || "Match found in document content.",
@@ -59,15 +59,15 @@ export default function DocumentCard({ doc, query }: { doc: DocResult; query: st
       </div>
 
       {/* Footer controls */}
-      <div className="flex items-center justify-between pt-2 border-t border-neutral-800/60 text-xs text-neutral-400 font-mono">
+      <div className="flex items-center justify-between pt-2 border-t border-teal/15 text-xs text-muted font-mono">
         <span>{formatSize(doc.file_size)}</span>
         <a
           href={`http://127.0.0.1:8000${doc.download_url}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-white rounded-md font-sans text-xs font-medium transition-colors"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-teal hover:bg-[#153835] text-foam rounded-lg font-sans text-xs font-medium transition-colors"
         >
-          <ExternalLink className="h-3.5 w-3.5 text-emerald-400" /> Open File
+          <ExternalLink className="h-3.5 w-3.5" /> Open Document
         </a>
       </div>
     </div>

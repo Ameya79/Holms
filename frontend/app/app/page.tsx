@@ -53,7 +53,7 @@ export default function SearchAppPage() {
   const hasSearched = query.length > 0 || documents.length > 0;
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-black text-white font-sans relative select-none">
+    <div className="flex flex-col h-screen overflow-hidden bg-sand text-ink font-sans relative select-none">
       {/* Clean Unified Top Bar */}
       <TopBar
         onOpenSettings={() => setIsSettingsOpen(true)}
@@ -71,7 +71,7 @@ export default function SearchAppPage() {
         {hasSearched && (
           <div className="w-full max-w-3xl flex flex-col gap-4 animate-fade-in mb-6">
             {statusMsg && (
-              <p className="text-xs text-neutral-400 font-mono mb-1">{statusMsg}</p>
+              <p className="text-xs text-muted font-mono mb-1">{statusMsg}</p>
             )}
 
             <DocumentGrid documents={documents} query={query} />

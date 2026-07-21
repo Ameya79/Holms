@@ -56,7 +56,7 @@ export default function UploadZone({ onDocsChanged }: Props) {
   };
 
   return (
-    <div className="flex flex-col gap-2.5 p-4 bg-neutral-950 border-t border-neutral-900 w-full shrink-0">
+    <div className="flex flex-col gap-2.5 p-4 bg-foam border-t border-teal/15 w-full shrink-0">
       <div
         onClick={() => fileInputRef.current?.click()}
         onDragOver={(e) => e.preventDefault()}
@@ -64,8 +64,8 @@ export default function UploadZone({ onDocsChanged }: Props) {
           e.preventDefault();
           if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
         }}
-        className={`flex items-center justify-center gap-2.5 p-3 border border-dashed border-neutral-800 rounded-lg
-                   bg-neutral-900/60 text-neutral-300 text-xs font-medium cursor-pointer hover:border-emerald-500/50 hover:bg-neutral-900 transition-all ${
+        className={`flex items-center justify-center gap-2.5 p-3.5 border border-dashed border-teal/25 rounded-xl
+                   bg-sand/40 text-teal text-xs font-medium cursor-pointer hover:border-teal hover:bg-sand/70 transition-all ${
                      uploading ? "opacity-50 pointer-events-none" : ""
                    }`}
       >
@@ -77,27 +77,27 @@ export default function UploadZone({ onDocsChanged }: Props) {
           hidden
           onChange={(e) => e.target.files && handleFiles(e.target.files)}
         />
-        <UploadCloud className="h-4 w-4 text-emerald-500" />
-        <span>{uploading ? "Uploading & Indexing..." : "Drag & drop PDFs, DOCX, or scanned notices here to index"}</span>
+        <UploadCloud className="h-4 w-4 text-drift" />
+        <span>{uploading ? "Uploading & Indexing..." : "Upload files / Drop documents here"}</span>
       </div>
 
       <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
         {docs.length === 0 ? (
-          <span className="text-xs text-neutral-500">No documents indexed yet.</span>
+          <span className="text-xs text-muted">No documents indexed yet.</span>
         ) : (
           docs.map((d) => (
             <span
               key={d.id}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-neutral-900 border border-neutral-800 text-neutral-300 text-xs font-mono rounded-md whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 px-3 py-1 bg-sand border border-teal/15 text-teal text-xs font-mono rounded-lg whitespace-nowrap shadow-xs"
             >
-              <FileText className="h-3 w-3 text-emerald-400" />
+              <FileText className="h-3 w-3 text-teal/80" />
               <span className="truncate max-w-[180px]">{d.filename}</span>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   handleDelete(d.id, d.filename);
                 }}
-                className="text-neutral-500 hover:text-red-400 ml-1 cursor-pointer"
+                className="text-muted hover:text-red-600 ml-1 cursor-pointer"
                 title="Delete from index"
               >
                 <X className="h-3 w-3" />
