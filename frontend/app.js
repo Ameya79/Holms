@@ -1,15 +1,12 @@
 /* ==========================================================================
-   Holms — App JavaScript
+   Holms v0.2 — App JavaScript
+   Document-centric search engine client logic.
    Talks to the local FastAPI backend over HTTP.
-   API URL is configurable (TRD §6 — needed for Vercel deployment).
    ========================================================================== */
 
 (() => {
     "use strict";
 
-    // ---------------------------------------------------------------------------
-    // Config
-    // ---------------------------------------------------------------------------
     const DEFAULT_API_URL = "http://localhost:8000";
 
     function getApiUrl() {
@@ -20,21 +17,26 @@
         localStorage.setItem("holms_api_url", url.replace(/\/+$/, ""));
     }
 
-    // ---------------------------------------------------------------------------
-    // DOM refs
-    // ---------------------------------------------------------------------------
-    const navBtns = document.querySelectorAll(".nav-btn");
-    const views = document.querySelectorAll(".view");
-
-    const chatMessages = document.getElementById("chat-messages");
+    // --- DOM Elements ---
+    const searchSection = document.getElementById("search-section");
+    const searchPrompt = document.getElementById("search-prompt");
     const queryInput = document.getElementById("query-input");
-    const sendBtn = document.getElementById("send-btn");
+    const searchBtn = document.getElementById("search-btn");
+
+    const resultsSection = document.getElementById("results-section");
+    const resultsStatus = document.getElementById("results-status");
+    const documentsGrid = document.getElementById("documents-grid");
+    const aiAnswerCard = document.getElementById("ai-answer-card");
+    const aiAnswerBody = document.getElementById("ai-answer-body");
+
+    const docsCountPill = document.getElementById("docs-count-pill");
+    const indexedPills = document.getElementById("indexed-pills");
     const dropZone = document.getElementById("drop-zone");
     const fileInput = document.getElementById("file-input");
 
-    const documentsList = document.getElementById("documents-list");
-    const uploadBtn = document.getElementById("upload-btn");
-
+    const openSettingsBtn = document.getElementById("open-settings-btn");
+    const closeSettingsBtn = document.getElementById("close-settings-btn");
+    const settingsModal = document.getElementById("settings-modal");
     const providerSelect = document.getElementById("provider-select");
     const apiKeyInput = document.getElementById("api-key-input");
     const toggleKeyBtn = document.getElementById("toggle-key-btn");
@@ -45,122 +47,24 @@
 
     const installBtn = document.getElementById("install-btn");
 
-    // ---------------------------------------------------------------------------
-    // Navigation
-    // ---------------------------------------------------------------------------
-    function switchView(viewName) {
-        views.forEach(v => v.classList.remove("active"));
-        navBtns.forEach(b => b.classList.remove("active"));
-
-        const view = document.getElementById(`view-${viewName}`);
-        const btn = document.querySelector(`[data-view="${viewName}"]`);
-        if (view) view.classList.add("active");
-        if (btn) btn.classList.add("active");
-
-        if (viewName === "documents") loadDocuments();
-        if (viewName === "settings") loadSettings();
-    }
-
-    navBtns.forEach(btn => {
-        btn.addEventListener("click", () => switchView(btn.dataset.view));
-    });
-
-    // ---------------------------------------------------------------------------
-    // Chat
-    // ---------------------------------------------------------------------------
-    let welcomeVisible = true;
-
-    function clearWelcome() {
-        if (welcomeVisible) {
-            const welcome = chatMessages.querySelector(".welcome-message");
-            if (welcome) welcome.remove();
-            welcomeVisible = false;
-        }
-    }
-
-    function addUserMessage(text) {
-        clearWelcome();
-        const div = document.createElement("div");
-        div.className = "message user";
-        div.textContent = text;
-        chatMessages.appendChild(div);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-
-    function addLoadingMessage() {
-        clearWelcome();
-        const div = document.createElement("div");
-        div.className = "message assistant loading-msg";
-        div.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
-        chatMessages.appendChild(div);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-        return div;
-    }
-
-    function removeLoadingMessage(el) {
-        if (el && el.parentNode) el.parentNode.removeChild(el);
-    }
-
-    function renderSearchResults(results) {
-        clearWelcome();
-
-        const label = document.createElement("div");
-        label.className = "search-mode-label";
-        label.textContent = "Search results (no API key configured — add one in Settings for AI answers)";
-        chatMessages.appendChild(label);
-
-        const container = document.createElement("div");
-        container.className = "search-results";
-
-        results.forEach((r, i) => {
-            const card = document.createElement("div");
-            card.className = "search-result-card";
-            card.innerHTML = `
-                <div class="result-header">
-                    <span class="result-filename">${escapeHtml(r.filename || r.doc_id)}</span>
-                    <span class="result-score">#${i + 1}</span>
-                </div>
-                <div class="result-snippet">${formatSnippet(r.snippet)}</div>
-            `;
-            container.appendChild(card);
-        });
-
-        chatMessages.appendChild(container);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-
-    function renderAnswer(answer, sources) {
-        clearWelcome();
-
-        const div = document.createElement("div");
-        div.className = "message assistant";
-
-        let sourcesHtml = "";
-        if (sources && sources.length > 0) {
-            const sourceNames = sources.map(s => {
-                if (Array.isArray(s)) return escapeHtml(s[1]);  // [doc_id, filename] tuple
-                return escapeHtml(s);
-            });
-            sourcesHtml = `<div class="sources">Sources: ${[...new Set(sourceNames)].join(", ")}</div>`;
-        }
-
-        div.innerHTML = `
-            <div class="answer-text">${formatAnswer(answer)}</div>
-            ${sourcesHtml}
-        `;
-        chatMessages.appendChild(div);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-
-    async function sendQuery() {
+    // --- Search Submission ---
+    async function executeSearch() {
         const query = queryInput.value.trim();
         if (!query) return;
 
-        addUserMessage(query);
-        queryInput.value = "";
-        sendBtn.disabled = true;
+        // Transition search box upwards
+        searchSection.classList.remove("centered");
+        searchSection.classList.add("active-results");
+        searchPrompt.style.display = "none";
 
-        const loading = addLoadingMessage();
+        // Show results section
+        resultsSection.style.display = "flex";
+        resultsStatus.textContent = "Searching documents...";
+        documentsGrid.innerHTML = "";
+        aiAnswerCard.style.display = "none";
+
+        searchBtn.disabled = true;
+        searchBtn.querySelector("span").textContent = "Searching...";
 
         try {
             const res = await fetch(`${getApiUrl()}/chat`, {
@@ -169,77 +73,120 @@
                 body: JSON.stringify({ query }),
             });
 
-            removeLoadingMessage(loading);
-
             if (!res.ok) {
-                const err = await res.json().catch(() => ({ detail: "Server error" }));
-                renderAnswer(`Error: ${err.detail || "Request failed"}`, []);
+                const err = await res.json().catch(() => ({ detail: "Request failed" }));
+                resultsStatus.textContent = `Error: ${err.detail || "Server error"}`;
+                searchBtn.disabled = false;
+                searchBtn.querySelector("span").textContent = "Search";
                 return;
             }
 
             const data = await res.json();
+            const docs = data.documents || [];
 
-            if (data.mode === "search_only") {
-                renderSearchResults(data.results || []);
+            resultsStatus.textContent = `${docs.length} ${docs.length === 1 ? "document" : "documents"} matched`;
+
+            if (docs.length === 0) {
+                documentsGrid.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--muted); font-size: 0.9rem;">
+                        No matching documents found. Try a different query or upload more files.
+                    </div>
+                `;
             } else {
-                renderAnswer(data.answer, data.sources);
+                renderDocumentCards(docs);
+            }
+
+            // Render AI Answer box below document cards if key configured & mode == answered
+            if (data.mode === "answered" && data.answer) {
+                aiAnswerBody.innerHTML = formatMarkdown(data.answer);
+                aiAnswerCard.style.display = "block";
             }
         } catch (err) {
-            removeLoadingMessage(loading);
-            renderAnswer(`Could not reach the backend at ${getApiUrl()}. Is it running?`, []);
+            resultsStatus.textContent = `Could not reach backend at ${getApiUrl()}. Is Holms running?`;
         }
 
-        sendBtn.disabled = false;
+        searchBtn.disabled = false;
+        searchBtn.querySelector("span").textContent = "Search";
     }
 
-    queryInput.addEventListener("input", () => {
-        sendBtn.disabled = !queryInput.value.trim();
-    });
+    function renderDocumentCards(docs) {
+        documentsGrid.innerHTML = docs.map(d => {
+            const typeClass = `type-${(d.file_type || "txt").toLowerCase()}`;
+            const fullDownloadUrl = d.download_url.startsWith("http") ? d.download_url : `${getApiUrl()}${d.download_url}`;
+
+            return `
+                <div class="doc-result-card ${typeClass}">
+                    <div class="doc-card-header">
+                        <div class="doc-card-title">
+                            <span class="doc-filename">${escapeHtml(d.filename)}</span>
+                            <span class="badge-type">${escapeHtml(d.file_type)}</span>
+                        </div>
+                        <span class="doc-filesize">${escapeHtml(d.file_size)}</span>
+                    </div>
+
+                    <div class="doc-snippet">${formatSnippet(d.top_snippet)}</div>
+
+                    <div class="doc-card-actions">
+                        <a href="${fullDownloadUrl}" target="_blank" class="btn-open-doc">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                            Open Document
+                        </a>
+                        <button class="btn-copy-path" onclick="copyDocPath('${escapeHtml(d.filename)}')">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                            Copy Path
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join("");
+    }
 
     queryInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" && !e.shiftKey) {
+        if (e.key === "Enter") {
             e.preventDefault();
-            sendQuery();
+            executeSearch();
         }
     });
 
-    sendBtn.addEventListener("click", sendQuery);
+    searchBtn.addEventListener("click", executeSearch);
 
-    // ---------------------------------------------------------------------------
-    // File upload
-    // ---------------------------------------------------------------------------
-    async function uploadFile(file) {
-        const toast = showToast(`Uploading ${file.name}...`);
-        dropZone.classList.add("uploading");
+    // --- Global copy helper ---
+    window.copyDocPath = function (filename) {
+        const path = `data/documents/${filename}`;
+        navigator.clipboard.writeText(path).then(() => {
+            alert(`Copied path: ${path}`);
+        });
+    };
 
-        const formData = new FormData();
-        formData.append("file", file);
+    // --- Upload Logic ---
+    async function uploadFiles(files) {
+        dropZone.style.opacity = "0.6";
 
-        try {
-            const res = await fetch(`${getApiUrl()}/upload`, {
-                method: "POST",
-                body: formData,
-            });
+        for (const file of files) {
+            const formData = new FormData();
+            formData.append("file", file);
 
-            if (!res.ok) {
-                const err = await res.json().catch(() => ({ detail: "Upload failed" }));
-                toast.textContent = `❌ ${err.detail}`;
-            } else {
-                const data = await res.json();
-                toast.textContent = `✓ ${data.filename} indexed`;
+            try {
+                const res = await fetch(`${getApiUrl()}/upload`, {
+                    method: "POST",
+                    body: formData,
+                });
+                if (!res.ok) {
+                    const err = await res.json();
+                    alert(`Failed to upload ${file.name}: ${err.detail || "Error"}`);
+                }
+            } catch {
+                alert(`Could not upload ${file.name}. Backend unreachable.`);
             }
-        } catch (err) {
-            toast.textContent = `❌ Could not reach backend`;
         }
 
-        dropZone.classList.remove("uploading");
-        setTimeout(() => toast.remove(), 3000);
+        dropZone.style.opacity = "1";
+        loadIndexedPills();
     }
 
     dropZone.addEventListener("click", () => fileInput.click());
-
     fileInput.addEventListener("change", () => {
-        [...fileInput.files].forEach(uploadFile);
+        if (fileInput.files.length) uploadFiles([...fileInput.files]);
         fileInput.value = "";
     });
 
@@ -255,86 +202,66 @@
     dropZone.addEventListener("drop", (e) => {
         e.preventDefault();
         dropZone.classList.remove("drag-over");
-        [...e.dataTransfer.files].forEach(uploadFile);
+        if (e.dataTransfer.files.length) uploadFiles([...e.dataTransfer.files]);
     });
 
-    // Upload button on documents page
-    if (uploadBtn) {
-        uploadBtn.addEventListener("click", () => {
-            const input = document.createElement("input");
-            input.type = "file";
-            input.multiple = true;
-            input.accept = ".pdf,.docx,.png,.jpg,.jpeg";
-            input.addEventListener("change", () => {
-                [...input.files].forEach(uploadFile);
-            });
-            input.click();
-        });
-    }
-
-    // ---------------------------------------------------------------------------
-    // Documents
-    // ---------------------------------------------------------------------------
-    async function loadDocuments() {
+    // --- Indexed Document Pills ---
+    async function loadIndexedPills() {
         try {
             const res = await fetch(`${getApiUrl()}/documents`);
-            if (!res.ok) throw new Error();
+            if (!res.ok) return;
             const docs = await res.json();
 
+            docsCountPill.textContent = `${docs.length} ${docs.length === 1 ? "indexed doc" : "indexed docs"}`;
+
             if (docs.length === 0) {
-                documentsList.innerHTML = '<p class="empty-state">No documents indexed yet. Upload some files to get started.</p>';
+                indexedPills.innerHTML = '<span style="font-size: 0.78rem; color: var(--muted);">No documents uploaded yet.</span>';
                 return;
             }
 
-            documentsList.innerHTML = docs.map(d => `
-                <div class="doc-card" data-id="${d.id}">
-                    <div class="doc-icon">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                    </div>
-                    <div class="doc-info">
-                        <div class="doc-name">${escapeHtml(d.filename)}</div>
-                        <div class="doc-meta">
-                            <span>${d.chunk_count || 0} chunks</span>
-                            <span>${formatDate(d.uploaded_at)}</span>
-                            ${d.ocr_used ? '<span class="doc-badge">OCR</span>' : ""}
-                        </div>
-                    </div>
-                    <button class="doc-delete" title="Delete" onclick="deleteDoc('${d.id}')">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
-                    </button>
-                </div>
+            indexedPills.innerHTML = docs.map(d => `
+                <span class="pill-doc" title="Uploaded ${d.uploaded_at}">
+                    📄 ${escapeHtml(d.filename)}
+                    <button class="pill-delete" onclick="deleteDocPill('${d.id}')" title="Delete from index">&times;</button>
+                </span>
             `).join("");
         } catch {
-            documentsList.innerHTML = '<p class="empty-state">Could not load documents. Is the backend running?</p>';
+            docsCountPill.textContent = "Backend offline";
         }
     }
 
-    // Expose to onclick handlers
-    window.deleteDoc = async function (id) {
-        if (!confirm("Delete this document and remove it from the index?")) return;
+    window.deleteDocPill = async function (id) {
+        if (!confirm("Delete this document from Holms index?")) return;
         try {
             await fetch(`${getApiUrl()}/documents/${id}`, { method: "DELETE" });
-            loadDocuments();
+            loadIndexedPills();
         } catch {
-            alert("Failed to delete document.");
+            alert("Delete failed.");
         }
     };
 
-    // ---------------------------------------------------------------------------
-    // Settings
-    // ---------------------------------------------------------------------------
-    async function loadSettings() {
+    // --- Settings Modal ---
+    function openSettings() {
         apiUrlInput.value = getApiUrl();
+        settingsModal.style.display = "flex";
+        loadSettingsData();
+    }
+
+    function closeSettings() {
+        settingsModal.style.display = "none";
+    }
+
+    async function loadSettingsData() {
         try {
             const res = await fetch(`${getApiUrl()}/settings`);
-            if (!res.ok) throw new Error();
+            if (!res.ok) return;
             const data = await res.json();
             providerSelect.value = data.provider || "anthropic";
             apiKeyInput.value = "";
             apiKeyInput.placeholder = data.api_keys[data.provider] || "Paste your API key...";
         } catch {
             settingsStatus.className = "settings-status error";
-            settingsStatus.textContent = "Could not load settings. Is the backend running?";
+            settingsStatus.textContent = "Could not load settings.";
         }
     }
 
@@ -356,9 +283,7 @@
                 settingsStatus.className = "settings-status success";
                 settingsStatus.textContent = "Settings saved.";
                 apiKeyInput.value = "";
-                loadSettings();
-            } else {
-                throw new Error();
+                loadSettingsData();
             }
         } catch {
             settingsStatus.className = "settings-status error";
@@ -374,17 +299,16 @@
         try {
             const res = await fetch(`${getApiUrl()}/settings/test`, { method: "POST" });
             const data = await res.json();
-
             if (data.status === "success") {
                 settingsStatus.className = "settings-status success";
-                settingsStatus.textContent = `✓ Connected! Response: "${data.response}"`;
+                settingsStatus.textContent = `Connected! Response: "${data.response}"`;
             } else {
                 settingsStatus.className = "settings-status error";
-                settingsStatus.textContent = `✗ ${data.message}`;
+                settingsStatus.textContent = data.message;
             }
         } catch {
             settingsStatus.className = "settings-status error";
-            settingsStatus.textContent = "Could not reach the backend.";
+            settingsStatus.textContent = "Backend unreachable.";
         }
     });
 
@@ -392,15 +316,15 @@
         apiKeyInput.type = apiKeyInput.type === "password" ? "text" : "password";
     });
 
-    // ---------------------------------------------------------------------------
-    // PWA install prompt (TRD §9)
-    // ---------------------------------------------------------------------------
-    let deferredPrompt = null;
+    openSettingsBtn.addEventListener("click", openSettings);
+    closeSettingsBtn.addEventListener("click", closeSettings);
 
+    // --- PWA Install Prompt ---
+    let deferredPrompt = null;
     window.addEventListener("beforeinstallprompt", (e) => {
         e.preventDefault();
         deferredPrompt = e;
-        installBtn.style.display = "flex";
+        installBtn.style.display = "inline-flex";
     });
 
     installBtn.addEventListener("click", async () => {
@@ -412,9 +336,7 @@
         }
     });
 
-    // ---------------------------------------------------------------------------
-    // Helpers
-    // ---------------------------------------------------------------------------
+    // --- Formatting Helpers ---
     function escapeHtml(str) {
         const div = document.createElement("div");
         div.textContent = str;
@@ -422,33 +344,17 @@
     }
 
     function formatSnippet(snippet) {
-        // Convert **bold** markers from highlight() to <strong> tags
-        return escapeHtml(snippet).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+        // Convert **match** markers from backend highlight() to <mark class="match">
+        return escapeHtml(snippet || "").replace(/\*\*(.+?)\*\*/g, '<mark class="match">$1</mark>');
     }
 
-    function formatAnswer(text) {
-        // Basic markdown-like formatting
-        return escapeHtml(text)
+    function formatMarkdown(text) {
+        return escapeHtml(text || "")
             .replace(/\n\n/g, "</p><p>")
             .replace(/\n/g, "<br>")
             .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
     }
 
-    function formatDate(dateStr) {
-        if (!dateStr) return "";
-        try {
-            const d = new Date(dateStr);
-            return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-        } catch {
-            return dateStr;
-        }
-    }
-
-    function showToast(message) {
-        const toast = document.createElement("div");
-        toast.className = "upload-toast";
-        toast.textContent = message;
-        document.body.appendChild(toast);
-        return toast;
-    }
+    // Init
+    loadIndexedPills();
 })();

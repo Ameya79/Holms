@@ -91,39 +91,102 @@ async def upload_file(file: UploadFile = File(...)):
     }
 
 
+def format_file_size(size_bytes: int) -> str:
+    """Format file size in human-readable string."""
+    if size_bytes < 1024:
+        return f"{size_bytes} B"
+    elif size_bytes < 1024 * 1024:
+        return f"{size_bytes / 1024:.1f} KB"
+    else:
+        return f"{size_bytes / (1024 * 1024):.1f} MB"
+
+
+def get_file_type(filename: str) -> str:
+    """Get uppercase file type badge label."""
+    ext = os.path.splitext(filename)[1].lower()
+    if ext == ".pdf":
+        return "PDF"
+    elif ext == ".docx":
+        return "DOCX"
+    elif ext in {".png", ".jpg", ".jpeg"}:
+        return "IMG"
+    return "TXT"
+
+
+@app.get("/documents/{filename}")
+def serve_document(filename: str):
+    """Serve the raw original document file."""
+    path = DOCS_DIR / filename
+    if not path.exists():
+        raise HTTPException(status_code=404, detail="Document file not found")
+    return FileResponse(path)
+
+
 # ---------------------------------------------------------------------------
-# Chat — TRD §4, §8
+# Chat / Search — TRD §4, §8, v0.2 spec
 # ---------------------------------------------------------------------------
 
 @app.post("/chat")
 def chat(request: ChatRequest):
     """
-    Hybrid search → ranked results.
-    No-API-key mode: return snippets directly (TRD §8).
-    AI mode: single LLM call for verification + answer (TRD §4).
+    Hybrid search → group hits by source document → return document objects.
+    No-API-key mode: return document cards directly.
+    AI mode: single LLM call for summary answer below document cards.
     """
     query = request.query.strip()
     if not query:
         raise HTTPException(status_code=400, detail="Query cannot be empty")
 
-    shortlist = hybrid_search(query, k=8)  # Always local, always free
+    shortlist = hybrid_search(query, k=16)  # Fetch candidate chunks
+
+    # Group chunks by document
+    doc_map = {}
+    for c in shortlist:
+        doc_id = c.doc_id
+        if doc_id not in doc_map:
+            doc_map[doc_id] = {
+                "doc_id": doc_id,
+                "filename": c.filename,
+                "chunks": [],
+            }
+        doc_map[doc_id]["chunks"].append(c)
+
+    # Build document result cards
+    document_results = []
+    for doc_id, data in doc_map.items():
+        filename = data["filename"]
+        chunks = sorted(data["chunks"], key=lambda x: x.score, reverse=True)
+        top_chunk = chunks[0]
+
+        filepath = DOCS_DIR / filename
+        file_size = format_file_size(filepath.stat().st_size) if filepath.exists() else "Unknown size"
+        file_type = get_file_type(filename)
+
+        document_results.append({
+            "doc_id": doc_id,
+            "filename": filename,
+            "file_type": file_type,
+            "file_size": file_size,
+            "download_url": f"/documents/{filename}",
+            "top_snippet": highlight(top_chunk.text, query),
+            "best_score": round(top_chunk.score, 4),
+            "matched_chunks": [
+                {"text": ch.text, "score": round(ch.score, 4)}
+                for ch in chunks
+            ],
+        })
+
+    # Sort documents by best chunk score descending
+    document_results.sort(key=lambda d: d["best_score"], reverse=True)
 
     config = get_config()
     active_key = config.get("api_keys", {}).get(config.get("provider", ""), "")
 
     if not active_key:
-        # No-API-key mode: return ranked, snippeted chunks directly
+        # Search-only mode: return ranked document cards directly
         return {
             "mode": "search_only",
-            "results": [
-                {
-                    "doc_id": c.doc_id,
-                    "filename": c.filename,
-                    "snippet": highlight(c.text, query),
-                    "score": c.score,
-                }
-                for c in shortlist
-            ],
+            "documents": document_results,
         }
 
     # AI mode: same shortlist, verified + answered — one LLM call
@@ -133,11 +196,10 @@ def chat(request: ChatRequest):
         return {
             "mode": "answered",
             "answer": answer,
-            "sources": list(
-                {c.doc_id: c.filename for c in shortlist}.items()
-            ),
+            "documents": document_results,
         }
     except Exception as e:
+        raise HTTPException(status_code=500, detail=f"LLM call failed: {e}")
         raise HTTPException(status_code=500, detail=f"LLM call failed: {e}")
 
 
