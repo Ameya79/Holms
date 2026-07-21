@@ -1,0 +1,24 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local Holms data directory (documents, index.db, config.json)
+data/
+
+# Environment / Virtualenv
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Temporary test files
+sample_notice.txt
+test_scan.pdf
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
