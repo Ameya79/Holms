@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 
-export default function Logo({ size = 32, className = "" }: { size?: number; className?: string }) {
+export default function Logo({ size = 48, className = "" }: { size?: number; className?: string }) {
   return (
     <Image
       src="/logo.png"
@@ -9,7 +9,7 @@ export default function Logo({ size = 32, className = "" }: { size?: number; cla
       width={size}
       height={size}
       priority
-      className={`rounded-lg object-contain shrink-0 ${className}`}
+      className={`object-contain shrink-0 ${className}`}
     />
   );
 }
