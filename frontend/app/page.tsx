@@ -1,6 +1,13 @@
 "use client";
+
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import OceanWaves from "@/components/OceanWaves";
+import FeatureSection from "@/components/ui/stack-feature-section";
+import { Button } from "@/components/ui/button";
+import { FaGithub } from "react-icons/fa";
+import { Download, ArrowRight } from "lucide-react";
 
 export default function LandingPage() {
   const [installPrompt, setInstallPrompt] = useState<any>(null);
@@ -25,78 +32,135 @@ export default function LandingPage() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col bg-sand text-ink">
-      {/* Hero (70vh) */}
-      <section className="h-[70vh] min-h-[520px] flex flex-col items-center justify-center text-center p-6 relative overflow-hidden bg-sand">
-        {/* SVG Island Pictogram */}
-        <div className="mb-6">
-          <svg viewBox="0 0 160 120" width="140" height="105">
-            <ellipse cx="80" cy="92" rx="58" ry="14" fill="#EDE3D0" stroke="#1F4E4A" strokeWidth="1.5"/>
-            <path d="M64 78 L80 62 L96 78 Z" fill="#1F4E4A"/>
-            <rect x="74" y="74" width="12" height="18" fill="#8A6D53"/>
-            <path d="M110 90 Q106 68 112 52" stroke="#8A6D53" strokeWidth="3" fill="none" strokeLinecap="round"/>
-            <path d="M112 52 Q95 46 88 56" stroke="#1F4E4A" strokeWidth="2.5" fill="none"/>
-            <path d="M112 52 Q125 40 132 50" stroke="#1F4E4A" strokeWidth="2.5" fill="none"/>
-            <path d="M112 52 Q118 64 126 62" stroke="#1F4E4A" strokeWidth="2" fill="none"/>
-          </svg>
+    <main className="min-h-screen flex flex-col bg-sand text-ink selection:bg-match selection:text-ink">
+      {/* Navigation Header */}
+      <header className="max-w-6xl mx-auto w-full px-6 py-6 flex items-center justify-between z-20">
+        <div className="flex items-center gap-3">
+          <Image
+            src="/logo.png"
+            alt="Holms Logomark"
+            width={40}
+            height={40}
+            className="rounded-lg shadow-sm border border-teal/20 object-cover"
+          />
+          <span className="font-serif text-2xl text-teal tracking-wide font-normal">
+            Holms
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" asChild size="sm">
+            <a
+              href="https://github.com/Ameya79/Holms.git"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FaGithub className="mr-1.5 h-3.5 w-3.5" /> Source
+            </a>
+          </Button>
+          <Button variant="secondary" size="sm" asChild>
+            <Link href="/app">
+              Open App <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+            </Link>
+          </Button>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section className="relative pt-12 pb-24 flex flex-col items-center justify-center text-center px-6 overflow-hidden">
+        {/* Brand Logomark Badge */}
+        <div className="mb-6 relative group">
+          <div className="absolute -inset-1 bg-gradient-to-r from-teal to-drift rounded-2xl blur-sm opacity-30 group-hover:opacity-60 transition duration-500"></div>
+          <Image
+            src="/logo.png"
+            alt="Holms Brand Logo"
+            width={120}
+            height={120}
+            priority
+            className="relative rounded-2xl shadow-md border-2 border-teal/30 object-cover bg-foam"
+          />
         </div>
 
-        <h1 className="font-serif text-5xl sm:text-6xl text-teal tracking-wide mb-2.5">Holms</h1>
-        <p className="text-muted text-lg sm:text-xl italic mb-8">Your documents. Your island.</p>
+        <h1 className="font-serif text-5xl sm:text-7xl text-teal tracking-wide mb-4 max-w-3xl leading-[1.1]">
+          Your documents. <br />
+          <span className="italic font-light">Your island.</span>
+        </h1>
 
-        {/* Animated Wave Lines */}
-        <div className="absolute bottom-6 left-0 w-full h-16 pointer-events-none">
-          <svg className="w-full h-full" viewBox="0 0 1200 60" preserveAspectRatio="none">
-            <path className="stroke-teal/40 stroke-2 fill-none animate-pulse" d="M0,30 Q300,5 600,30 T1200,30"/>
-            <path className="stroke-teal/20 stroke-[1.5] fill-none" d="M0,40 Q300,55 600,40 T1200,40"/>
-          </svg>
+        <p className="text-muted text-lg sm:text-xl max-w-xl mb-10 leading-relaxed">
+          Local-first, self-hosted personal document search. OCR scanned notices, search by meaning in SQLite, and verify with your own AI key.
+        </p>
+
+        <div className="flex flex-col sm:flex-row items-center gap-4 z-20">
+          <Button size="lg" variant="secondary" onClick={handleInstall} className="shadow-md text-base px-8 py-6">
+            <Download className="mr-2 h-5 w-5" />
+            Install Holms App
+          </Button>
+          <Button size="lg" variant="outline" asChild className="text-base px-8 py-6">
+            <Link href="/app">
+              Launch Web Interface <ArrowRight className="ml-2 h-5 w-5" />
+            </Link>
+          </Button>
+        </div>
+
+        <p className="text-muted text-xs mt-4">Works natively on macOS, Windows, Linux</p>
+
+        {/* Shore & Ocean Waves Animation */}
+        <div className="w-full mt-12">
+          <OceanWaves />
         </div>
       </section>
 
       {/* Value Strip */}
-      <div className="flex items-center justify-center gap-4 px-5 py-6 bg-foam border-y border-teal/15 text-teal text-sm font-medium text-center flex-wrap">
-        <span>Search what's yours</span>
-        <span className="text-drift font-bold">·</span>
-        <span>Works without an API key</span>
-        <span className="text-drift font-bold">·</span>
-        <span>Nothing leaves your machine</span>
+      <div className="bg-foam border-y border-teal/15 py-6 px-6">
+        <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-center gap-6 text-teal font-medium text-sm sm:text-base text-center">
+          <span className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-drift"></span>
+            Search what's yours
+          </span>
+          <span className="text-drift/40 hidden sm:inline">•</span>
+          <span className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-teal"></span>
+            Works without an API key
+          </span>
+          <span className="text-drift/40 hidden sm:inline">•</span>
+          <span className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-drift"></span>
+            Nothing leaves your machine
+          </span>
+        </div>
       </div>
 
-      {/* CTA Section */}
-      <section className="flex flex-col items-center justify-center p-12 bg-foam text-center">
-        <button
-          onClick={handleInstall}
-          className="inline-flex items-center gap-2.5 px-9 py-4 bg-drift text-white text-base font-semibold rounded-md hover:bg-[#9a7d63] transition-colors cursor-pointer"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
-          Install Holms
-        </button>
-        <p className="text-muted text-xs mt-3.5">Works on Mac, Windows, Linux</p>
-        <p className="text-muted text-[11px] mt-1">v0.1 — self-hosted, open source</p>
-
-        <Link href="/app" className="text-teal text-sm underline underline-offset-4 mt-6 hover:text-drift">
-          Open the App →
-        </Link>
-      </section>
+      {/* Interactive Stack Feature Section (Stack-Feature Component) */}
+      <div className="px-6">
+        <FeatureSection />
+      </div>
 
       {/* Sand Section Footer */}
-      <footer className="bg-[#D9CDB5] p-12 text-center text-teal">
-        <div className="max-w-xl mx-auto">
+      <footer className="bg-[#D9CDB5] border-t border-teal/20 py-16 px-6 text-teal">
+        <div className="max-w-2xl mx-auto text-center">
+          <Image
+            src="/logo.png"
+            alt="Holms Logo"
+            width={48}
+            height={48}
+            className="mx-auto rounded-xl border border-teal/30 mb-4 shadow-sm"
+          />
+          <h3 className="font-serif text-2xl text-teal mb-3">Holms</h3>
           <p className="text-sm leading-relaxed text-ink/90 mb-6">
-            Holms runs locally on your computer. It extracts, embeds, and indexes your PDFs, DOCX files, and scanned notices into a local SQLite index file. You can search by meaning without any AI API key configured, or connect your key to get concise answers verified against your own documents.
+            A single-tenant local document search engine. Indexes PDFs, DOCX files, and scanned images locally into SQLite index using fastembed and FTS5 BM25 search.
           </p>
-          <a
-            href="https://github.com/Ameya79/Holms.git"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-teal font-semibold text-sm underline underline-offset-4 hover:text-drift"
-          >
-            View Source on GitHub
-          </a>
+          <div className="flex items-center justify-center gap-6 text-sm font-semibold">
+            <Link href="/app" className="text-teal hover:text-drift underline underline-offset-4">
+              Open Search App
+            </Link>
+            <a
+              href="https://github.com/Ameya79/Holms.git"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-teal hover:text-drift underline underline-offset-4 flex items-center gap-1.5"
+            >
+              <FaGithub className="h-4 w-4" /> GitHub Repository
+            </a>
+          </div>
         </div>
       </footer>
     </main>
