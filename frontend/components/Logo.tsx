@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 
-export default function Logo({ size = 48, className = "" }: { size?: number; className?: string }) {
+export default function Logo({ size = 36, className = "" }: { size?: number; className?: string }) {
   return (
     <Image
       src="/logo.png"
