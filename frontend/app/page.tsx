@@ -5,7 +5,6 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import Logo from "@/components/Logo";
 import FeatureSection from "@/components/ui/stack-feature-section";
-import VectorVisualization from "@/components/VectorVisualization";
 import Infographics from "@/components/Infographics";
 import { Button } from "@/components/ui/button";
 import { FaGithub } from "react-icons/fa";
@@ -61,7 +60,7 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* Hero Section - Compact padding so image is visible above fold */}
+      {/* Hero Section */}
       <section className="relative pt-6 pb-8 flex flex-col items-center justify-center text-center px-6 max-w-4xl mx-auto">
         <div className="mb-3 inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-foam border border-teal/20 text-teal text-xs font-medium">
           <span className="w-2 h-2 rounded-full bg-drift"></span>
@@ -74,12 +73,12 @@ export default function LandingPage() {
           <span className="italic font-light">lost documents.</span>
         </h1>
 
-        {/* Relatable Subtitle */}
+        {/* Non-Technical Relatable Subtitle */}
         <p className="text-muted text-sm sm:text-base max-w-2xl mb-5 leading-relaxed font-sans">
           We save files and forget where they went. Hostel notices, tax receipts, rental agreements, medical bills—buried deep in Downloads. Holms reels them back in instantly by what they mean.
         </p>
 
-        {/* CTA Buttons */}
+        {/* Action Buttons */}
         <div className="flex flex-row items-center gap-3 z-20 mb-6">
           <Button size="default" variant="secondary" onClick={handleInstall} className="shadow-sm text-xs px-6 py-2.5">
             <Download className="mr-2 h-4 w-4" />
@@ -92,7 +91,7 @@ export default function LandingPage() {
           </Button>
         </div>
 
-        {/* Fisherman Hero Artwork - Prominent & Visible Above the Fold */}
+        {/* Hero Artwork 1: Fisherman fishing for documents (Prominent & Visible Above the Fold) */}
         <div className="w-full max-w-xl relative">
           <Image
             src="/hero_illustration.png"
@@ -120,12 +119,12 @@ export default function LandingPage() {
           <span className="text-drift/40 hidden sm:inline">•</span>
           <span className="flex items-center gap-2">
             <Shield className="h-4 w-4 text-drift" />
-            Reads Scanned Notice Photos
+            Reads Scanned Photo Notices
           </span>
         </div>
       </div>
 
-      {/* Explanation Spot - Document Tank Illustration & Narrative */}
+      {/* Explanation Spot 1: Glass Tank Artwork & Problem Explanation */}
       <section className="py-16 px-6 max-w-5xl mx-auto">
         <div className="text-center mb-10">
           <span className="text-xs font-mono font-semibold uppercase tracking-wider text-drift">
@@ -140,7 +139,7 @@ export default function LandingPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-          {/* Document Tank Image (Transparent background blending seamlessly) */}
+          {/* Hero Artwork 2: Tank of Floating Documents (Transparent background) */}
           <div className="relative flex justify-center">
             <Image
               src="/explanation_tank.png"
@@ -151,31 +150,74 @@ export default function LandingPage() {
             />
           </div>
 
-          {/* Explanation Text */}
-          <div className="space-y-6">
+          {/* Non-Technical Problem Cards */}
+          <div className="space-y-5">
             <div className="bg-foam border border-teal/20 rounded-2xl p-5 shadow-xs">
-              <h3 className="font-semibold text-teal text-base mb-1">Reads Scanned Photo Notices</h3>
+              <h3 className="font-semibold text-teal text-base mb-1">Standard search only looks at filenames</h3>
               <p className="text-muted text-xs leading-relaxed">
-                Hostel notices and tax receipts often have text baked inside images. Holms extracts text automatically so you can search image content instantly.
+                If your hostel notice photo is named <code className="bg-sand px-1.5 py-0.5 rounded text-teal">IMG_4901.jpg</code>, standard search will never find it when you search "mess closed".
               </p>
             </div>
 
             <div className="bg-foam border border-teal/20 rounded-2xl p-5 shadow-xs">
-              <h3 className="font-semibold text-teal text-base mb-1">Understands Concepts, Not Just Words</h3>
+              <h3 className="font-semibold text-teal text-base mb-1">Holms reads text inside photo notices</h3>
               <p className="text-muted text-xs leading-relaxed">
-                Searching "rent agreement" will match lease PDFs containing "monthly payment terms"—even if the exact word "rent" is never mentioned.
+                Holms extracts text baked inside scanned images and PDF forms automatically so you can search their contents instantly.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Vector Visualization Section */}
-      <div className="max-w-5xl mx-auto w-full px-6">
-        <VectorVisualization />
-      </div>
+      {/* Explanation Spot 2: Document Transform Artwork & How Holms Indexes Files */}
+      <section className="py-16 px-6 max-w-5xl mx-auto border-t border-teal/15">
+        <div className="text-center mb-10">
+          <span className="text-xs font-mono font-semibold uppercase tracking-wider text-drift">
+            Smart & Simple Indexing
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-serif text-teal mt-2 mb-3">
+            How Holms turns your files into searchable answers
+          </h2>
+          <p className="text-muted text-sm max-w-xl mx-auto">
+            Drop in any file and Holms transforms raw text and photo notices into a private, local search index on your computer.
+          </p>
+        </div>
 
-      {/* Tech Stack Orbit Feature Section - Shifted Below */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+          {/* Non-Technical Solution Cards */}
+          <div className="space-y-5 order-2 md:order-1">
+            <div className="bg-foam border border-teal/20 rounded-2xl p-5 shadow-xs">
+              <h3 className="font-semibold text-teal text-base mb-1">Search by concepts, not just words</h3>
+              <p className="text-muted text-xs leading-relaxed">
+                Searching "rent receipt" will match lease PDFs containing "monthly payment terms"—even if the exact word "rent" is never mentioned.
+              </p>
+            </div>
+
+            <div className="bg-foam border border-teal/20 rounded-2xl p-5 shadow-xs">
+              <h3 className="font-semibold text-teal text-base mb-1">Open original files with one click</h3>
+              <p className="text-muted text-xs leading-relaxed">
+                Every search result surfaces the actual document card with a single-click button to open or download the original file.
+              </p>
+            </div>
+          </div>
+
+          {/* Hero Artwork 3: Document Indexing Transformation (Transparent background) */}
+          <div className="relative flex justify-center order-1 md:order-2">
+            <Image
+              src="/doc_transform.png"
+              alt="Document transforming into a structured search index"
+              width={480}
+              height={320}
+              className="w-full max-w-md h-auto object-contain transition-transform hover:scale-[1.02] duration-500"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Non-Technical Infographics */}
+      <Infographics />
+
+      {/* Tech Stack Orbit Feature Section - Positioned Below */}
       <section className="px-6 max-w-6xl mx-auto">
         <div className="text-center pt-8">
           <span className="text-xs font-mono font-semibold uppercase tracking-wider text-drift">
@@ -187,9 +229,6 @@ export default function LandingPage() {
         </div>
         <FeatureSection />
       </section>
-
-      {/* Non-Technical Infographics & How it Works */}
-      <Infographics />
 
       {/* Sand Footer */}
       <footer className="bg-[#D9CDB5] border-t border-teal/20 py-12 px-6 text-teal">
