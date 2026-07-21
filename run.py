@@ -101,7 +101,11 @@ def main():
 
     print()
     print("=" * 60)
-    print("  Holms is running at http://localhost:8000")
+    if (Path(__file__).parent / "frontend" / "out").exists():
+        print("  Holms is running at http://localhost:8000")
+    else:
+        print("  Backend running at http://localhost:8000")
+        print("  Start frontend: cd frontend && npm run dev -> http://localhost:3000")
     print("  Press Ctrl+C to stop.")
     print("=" * 60)
     print()

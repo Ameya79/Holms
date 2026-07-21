@@ -24,7 +24,12 @@ app = FastAPI(title="Holms", description="Local document search + RAG assistant"
 # CORS — allow the Vercel-hosted UI and local dev (TRD §6)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Tighten to specific Vercel domain in production
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:8000",
+        "*"
+    ],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -353,15 +358,22 @@ def test_connection():
 
 
 # ---------------------------------------------------------------------------
-# Serve frontend static files (so one process serves both API + UI)
+# Serve frontend static files (Next.js static export out/)
 # ---------------------------------------------------------------------------
 from pathlib import Path
 
-FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
-if FRONTEND_DIR.exists():
+OUT_DIR = Path(__file__).parent.parent / "frontend" / "out"
+if OUT_DIR.exists():
     @app.get("/")
-    def serve_index():
-        return FileResponse(FRONTEND_DIR / "index.html")
+    def serve_landing():
+        return FileResponse(OUT_DIR / "index.html")
 
-    app.mount("/", StaticFiles(directory=str(FRONTEND_DIR)), name="frontend")
+    @app.get("/app")
+    def serve_app_route():
+        app_html = OUT_DIR / "app" / "index.html"
+        if app_html.exists():
+            return FileResponse(app_html)
+        return FileResponse(OUT_DIR / "index.html")
+
+    app.mount("/", StaticFiles(directory=str(OUT_DIR), html=True), name="static")
 
