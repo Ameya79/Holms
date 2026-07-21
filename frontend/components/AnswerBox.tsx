@@ -1,33 +1,18 @@
 "use client";
+import { Sparkles } from "lucide-react";
 
-interface Props {
-  answer: string;
-}
-
-function formatMarkdown(text: string) {
-  if (!text) return "";
-  return text
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/\n\n/g, "</p><p class='mt-2'>")
-    .replace(/\n/g, "<br/>")
-    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-}
-
-export default function AnswerBox({ answer }: Props) {
-  if (!answer) return null;
-
+export default function AnswerBox({ answer }: { answer: string }) {
   return (
-    <div className="bg-foam border-1.5 border-teal rounded-lg p-5 mt-4 shadow-sm">
-      <div className="mb-2.5">
-        <span className="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-drift text-white">
-          AI Answer
-        </span>
+    <div className="bg-neutral-900 border border-emerald-500/30 rounded-xl p-5 mt-4 shadow-sm">
+      <div className="flex items-center gap-2 mb-3">
+        <Sparkles className="h-4 w-4 text-emerald-400" />
+        <h3 className="font-semibold text-emerald-400 text-sm tracking-tight">
+          Grounded AI Answer
+        </h3>
       </div>
-      <div
-        className="text-sm leading-relaxed text-ink"
-        dangerouslySetInnerHTML={{ __html: formatMarkdown(answer) }}
-      />
+      <p className="text-neutral-200 text-sm leading-relaxed whitespace-pre-wrap font-sans">
+        {answer}
+      </p>
     </div>
   );
 }

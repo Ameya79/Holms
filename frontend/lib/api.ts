@@ -40,13 +40,14 @@ export async function getSettings() {
   return res.json();
 }
 
-export async function saveSettings(provider: string, apiKey: string) {
+export async function saveSettings(provider: string, apiKeys: Record<string, string> | string) {
+  const keysObj = typeof apiKeys === "string" ? { [provider]: apiKeys } : apiKeys;
   const res = await fetch(`${BASE}/settings`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       provider,
-      api_keys: { [provider]: apiKey },
+      api_keys: keysObj,
     }),
   });
   if (!res.ok) throw new Error(`Save settings failed: ${res.status}`);

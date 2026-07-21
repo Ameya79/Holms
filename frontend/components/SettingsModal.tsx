@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { getSettings, saveSettings, testConnection } from "@/lib/api";
+import { X, CheckCircle2, AlertCircle } from "lucide-react";
 
 interface Props {
   isOpen: boolean;
@@ -9,124 +10,122 @@ interface Props {
 
 export default function SettingsModal({ isOpen, onClose }: Props) {
   const [provider, setProvider] = useState("anthropic");
-  const [apiKey, setApiKey] = useState("");
-  const [showKey, setShowKey] = useState(false);
-  const [statusMsg, setStatusMsg] = useState<{ text: string; type: "success" | "error" | "info" } | null>(null);
+  const [apiKeys, setApiKeys] = useState<Record<string, string>>({
+    anthropic: "",
+    gemini: "",
+    openai: "",
+    groq: "",
+  });
+  const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [testing, setTesting] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
-      getSettings()
-        .then((data) => {
-          setProvider(data.provider || "anthropic");
-          setApiKey("");
-        })
-        .catch(() => {
-          setStatusMsg({ text: "Could not connect to backend.", type: "error" });
-        });
+      getSettings().then((cfg) => {
+        setProvider(cfg.provider || "anthropic");
+        setApiKeys((prev) => ({ ...prev, ...(cfg.api_keys || {}) }));
+      }).catch(() => {});
     }
   }, [isOpen]);
 
   if (!isOpen) return null;
 
   const handleSave = async () => {
-    setStatusMsg(null);
+    setSaving(true);
     try {
-      await saveSettings(provider, apiKey);
-      setStatusMsg({ text: "Settings saved successfully.", type: "success" });
-      setApiKey("");
-    } catch {
-      setStatusMsg({ text: "Failed to save settings.", type: "error" });
+      await saveSettings(provider, apiKeys);
+      onClose();
+    } catch (err: any) {
+      alert(`Save failed: ${err.message}`);
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleTest = async () => {
-    setStatusMsg({ text: "Testing connection...", type: "info" });
+    setTesting(true);
+    setTestResult(null);
     try {
-      const data = await testConnection();
-      if (data.status === "success") {
-        setStatusMsg({ text: `Connected! Response: "${data.response}"`, type: "success" });
-      } else {
-        setStatusMsg({ text: data.message || "Test failed", type: "error" });
-      }
-    } catch {
-      setStatusMsg({ text: "Backend unreachable.", type: "error" });
+      const res = await testConnection();
+      setTestResult(res);
+    } catch (err: any) {
+      setTestResult({ success: false, message: err.message });
+    } finally {
+      setTesting(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-      <div className="bg-foam border border-teal rounded-xl w-full max-w-md shadow-2xl overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-teal/15">
-          <h2 className="font-serif text-xl font-normal text-teal">Settings</h2>
-          <button onClick={onClose} className="text-muted text-2xl hover:text-ink cursor-pointer">&times;</button>
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+      <div className="bg-neutral-900 border border-neutral-800 rounded-2xl max-w-md w-full p-6 shadow-xl text-white">
+        <div className="flex items-center justify-between mb-6 pb-3 border-b border-neutral-800">
+          <h2 className="text-lg font-bold font-sans">Settings & AI Keys</h2>
+          <button onClick={onClose} className="text-neutral-400 hover:text-white cursor-pointer">
+            <X className="h-5 w-5" />
+          </button>
         </div>
 
-        <div className="p-6 flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-teal">AI Provider</label>
-            <p className="text-xs text-muted mb-1">
-              Optional — Holms works without an API key. Adding one turns search results into written answers.
-            </p>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
+              Select AI Provider
+            </label>
             <select
               value={provider}
               onChange={(e) => setProvider(e.target.value)}
-              className="p-2.5 border border-teal/30 rounded-md text-sm bg-white text-ink outline-none focus:border-teal"
+              className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2.5 text-sm text-white focus:border-emerald-500 outline-none"
             >
               <option value="anthropic">Anthropic (Claude)</option>
-              <option value="openai">OpenAI (GPT)</option>
-              <option value="gemini">Google (Gemini)</option>
-              <option value="groq">Groq (Llama)</option>
+              <option value="openai">OpenAI (GPT-4o Mini)</option>
+              <option value="gemini">Google Gemini (2.0 Flash)</option>
+              <option value="groq">Groq (Llama 3.3 70B)</option>
             </select>
           </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-teal">API Key</label>
-            <div className="flex gap-1.5">
-              <input
-                type={showKey ? "text" : "password"}
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder="Paste your API key..."
-                className="flex-1 p-2.5 border border-teal/30 rounded-md text-sm bg-white text-ink outline-none focus:border-teal"
-              />
-              <button
-                type="button"
-                onClick={() => setShowKey(!showKey)}
-                className="px-3 border border-teal/30 bg-white rounded-md text-teal cursor-pointer hover:bg-teal/5"
-              >
-                👁
-              </button>
-            </div>
+          <div className="space-y-3">
+            <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider">
+              API Keys
+            </label>
+            {["anthropic", "openai", "gemini", "groq"].map((p) => (
+              <div key={p}>
+                <label className="block text-xs text-neutral-400 capitalize mb-1">{p} Key</label>
+                <input
+                  type="password"
+                  value={apiKeys[p] || ""}
+                  onChange={(e) => setApiKeys({ ...apiKeys, [p]: e.target.value })}
+                  placeholder={`Enter ${p} API key...`}
+                  className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2.5 text-xs text-white placeholder:text-neutral-600 focus:border-emerald-500 outline-none font-mono"
+                />
+              </div>
+            ))}
           </div>
 
-          <div className="flex gap-2.5 pt-2">
-            <button
-              onClick={handleSave}
-              className="px-4 py-2 bg-drift text-white rounded-md text-sm font-medium hover:bg-[#9a7d63] cursor-pointer"
-            >
-              Save Settings
-            </button>
-            <button
-              onClick={handleTest}
-              className="px-4 py-2 border border-teal/30 bg-white text-teal rounded-md text-sm font-medium hover:bg-teal/5 cursor-pointer"
-            >
-              Test Connection
-            </button>
-          </div>
-
-          {statusMsg && (
-            <div
-              className={`p-2.5 rounded-md text-xs ${
-                statusMsg.type === "success"
-                  ? "bg-green-100 text-green-800"
-                  : statusMsg.type === "error"
-                  ? "bg-red-100 text-red-800"
-                  : "bg-blue-100 text-blue-800"
-              }`}
-            >
-              {statusMsg.text}
+          {testResult && (
+            <div className={`p-3 rounded-lg text-xs flex items-center gap-2 ${
+              testResult.success ? "bg-emerald-950/80 text-emerald-300 border border-emerald-800" : "bg-red-950/80 text-red-300 border border-red-800"
+            }`}>
+              {testResult.success ? <CheckCircle2 className="h-4 w-4 shrink-0" /> : <AlertCircle className="h-4 w-4 shrink-0" />}
+              <span>{testResult.message}</span>
             </div>
           )}
+        </div>
+
+        <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-neutral-800">
+          <button
+            onClick={handleTest}
+            disabled={testing}
+            className="px-4 py-2 bg-neutral-800 text-neutral-200 text-xs font-medium rounded-lg hover:bg-neutral-700 disabled:opacity-50 cursor-pointer"
+          >
+            {testing ? "Testing..." : "Test Connection"}
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="px-4 py-2 bg-emerald-600 text-white text-xs font-medium rounded-lg hover:bg-emerald-500 disabled:opacity-50 cursor-pointer"
+          >
+            {saving ? "Saving..." : "Save Settings"}
+          </button>
         </div>
       </div>
     </div>

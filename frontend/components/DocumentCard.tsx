@@ -1,95 +1,74 @@
 "use client";
-import { documentUrl } from "@/lib/api";
-
-interface Chunk {
-  text: string;
-  score: number;
-}
+import { FileText, Download, ExternalLink } from "lucide-react";
 
 export interface DocResult {
   doc_id: string;
   filename: string;
   file_type: string;
-  file_size?: string;
+  file_size: number;
   download_url: string;
   top_snippet: string;
-  matched_chunks?: Chunk[];
+  matched_chunks: Array<{ chunk_id: number; snippet: string; score: number }>;
 }
 
-interface Props {
-  doc: DocResult;
-  query: string;
-}
+export default function DocumentCard({ doc, query }: { doc: DocResult; query: string }) {
+  const getBadgeColor = (type: string) => {
+    switch (type.toLowerCase()) {
+      case "pdf":
+        return "bg-red-950/80 text-red-300 border-red-900/50";
+      case "docx":
+        return "bg-blue-950/80 text-blue-300 border-blue-900/50";
+      case "png":
+      case "jpg":
+      case "jpeg":
+        return "bg-amber-950/80 text-amber-300 border-amber-900/50";
+      default:
+        return "bg-neutral-800 text-neutral-300 border-neutral-700";
+    }
+  };
 
-const TYPE_ACCENT: Record<string, string> = {
-  PDF: "border-l-teal",
-  DOCX: "border-l-drift",
-  IMG: "border-l-sand",
-  TXT: "border-l-teal",
-};
-
-function formatSnippet(text: string) {
-  if (!text) return "";
-  // Convert **match** markers from backend highlight() to <mark class="bg-match px-0.5 rounded-xs font-semibold">
-  return text.replace(/\*\*(.+?)\*\*/g, '<mark class="bg-match px-1 py-0.5 rounded-xs font-semibold">$1</mark>');
-}
-
-export default function DocumentCard({ doc, query }: Props) {
-  const accent = TYPE_ACCENT[doc.file_type] ?? "border-l-teal";
-  const snippet = formatSnippet(doc.top_snippet);
-  const rawUrl = documentUrl(doc.filename);
-
-  const handleCopyPath = () => {
-    const path = `data/documents/${doc.filename}`;
-    navigator.clipboard.writeText(path);
-    alert(`Copied path: ${path}`);
+  const formatSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
   return (
-    <div
-      className={`bg-foam border border-teal/20 border-l-[5px] ${accent} rounded-lg p-5 flex flex-col gap-3 shadow-xs hover:shadow-md transition-all`}
-    >
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="font-semibold text-teal text-base truncate">{doc.filename}</span>
-          <span className="text-[11px] font-semibold tracking-wider text-teal bg-teal/10 rounded px-2 py-0.5 shrink-0">
+    <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-5 flex flex-col justify-between hover:border-neutral-700 transition-all shadow-sm">
+      <div>
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <FileText className="h-5 w-5 text-emerald-400 shrink-0" />
+            <h3 className="font-semibold text-white text-base truncate" title={doc.filename}>
+              {doc.filename}
+            </h3>
+          </div>
+          <span className={`text-[10px] font-mono font-semibold uppercase px-2 py-0.5 rounded border ${getBadgeColor(doc.file_type)}`}>
             {doc.file_type}
           </span>
         </div>
-        {doc.file_size && (
-          <span className="text-xs text-muted shrink-0">{doc.file_size}</span>
-        )}
+
+        {/* Snippet box */}
+        <div className="bg-neutral-950 border border-neutral-800/80 rounded-lg p-3 my-3 text-xs text-neutral-300 font-sans leading-relaxed">
+          <span
+            dangerouslySetInnerHTML={{
+              __html: doc.top_snippet || "Match found in document content.",
+            }}
+          />
+        </div>
       </div>
 
-      <p
-        className="text-sm text-ink/90 leading-relaxed bg-white/60 p-3 rounded-md border border-teal/10"
-        dangerouslySetInnerHTML={{ __html: snippet }}
-      />
-
-      <div className="flex items-center gap-2 mt-1">
+      {/* Footer controls */}
+      <div className="flex items-center justify-between pt-2 border-t border-neutral-800/60 text-xs text-neutral-400 font-mono">
+        <span>{formatSize(doc.file_size)}</span>
         <a
-          href={rawUrl}
+          href={`http://127.0.0.1:8000${doc.download_url}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-xs bg-teal text-white px-3.5 py-1.5 rounded-md font-medium hover:bg-[#153835] transition-colors"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-white rounded-md font-sans text-xs font-medium transition-colors"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
-            <polyline points="15 3 21 3 21 9"/>
-            <line x1="10" y1="14" x2="21" y2="3"/>
-          </svg>
-          Open Document
+          <ExternalLink className="h-3.5 w-3.5 text-emerald-400" /> Open File
         </a>
-        <button
-          onClick={handleCopyPath}
-          className="inline-flex items-center gap-1.5 text-xs border border-teal/30 text-teal px-3.5 py-1.5 rounded-md font-medium hover:bg-teal/5 transition-colors cursor-pointer"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-            <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
-          </svg>
-          Copy Path
-        </button>
       </div>
     </div>
   );

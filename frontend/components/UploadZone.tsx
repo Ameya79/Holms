@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 import { listDocuments, uploadFile, deleteDocument } from "@/lib/api";
+import { UploadCloud, FileText, X } from "lucide-react";
 
 interface DocItem {
   id: string;
@@ -55,7 +56,7 @@ export default function UploadZone({ onDocsChanged }: Props) {
   };
 
   return (
-    <div className="flex flex-col gap-2.5 p-4 bg-foam border-t border-teal/15 w-full">
+    <div className="flex flex-col gap-2.5 p-4 bg-neutral-950 border-t border-neutral-900 w-full shrink-0">
       <div
         onClick={() => fileInputRef.current?.click()}
         onDragOver={(e) => e.preventDefault()}
@@ -63,8 +64,8 @@ export default function UploadZone({ onDocsChanged }: Props) {
           e.preventDefault();
           if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
         }}
-        className={`flex items-center justify-center gap-2 p-3 border-1.5 border-dashed border-teal/30 rounded-md
-                   bg-foam text-teal text-xs font-medium cursor-pointer hover:bg-teal/5 hover:border-teal transition-all ${
+        className={`flex items-center justify-center gap-2.5 p-3 border border-dashed border-neutral-800 rounded-lg
+                   bg-neutral-900/60 text-neutral-300 text-xs font-medium cursor-pointer hover:border-emerald-500/50 hover:bg-neutral-900 transition-all ${
                      uploading ? "opacity-50 pointer-events-none" : ""
                    }`}
       >
@@ -76,30 +77,30 @@ export default function UploadZone({ onDocsChanged }: Props) {
           hidden
           onChange={(e) => e.target.files && handleFiles(e.target.files)}
         />
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-          <polyline points="17 8 12 3 7 8"/>
-          <line x1="12" y1="3" x2="12" y2="15"/>
-        </svg>
-        <span>{uploading ? "Uploading & Indexing..." : "Upload files / Drop documents here"}</span>
+        <UploadCloud className="h-4 w-4 text-emerald-500" />
+        <span>{uploading ? "Uploading & Indexing..." : "Drag & drop PDFs, DOCX, or scanned notices here to index"}</span>
       </div>
 
       <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
         {docs.length === 0 ? (
-          <span className="text-xs text-muted">No documents uploaded yet.</span>
+          <span className="text-xs text-neutral-500">No documents indexed yet.</span>
         ) : (
           docs.map((d) => (
             <span
               key={d.id}
-              className="inline-flex items-center gap-1.5 px-3 py-1 bg-sand text-teal text-xs font-medium rounded-full whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-neutral-900 border border-neutral-800 text-neutral-300 text-xs font-mono rounded-md whitespace-nowrap"
             >
-              📄 {d.filename}
+              <FileText className="h-3 w-3 text-emerald-400" />
+              <span className="truncate max-w-[180px]">{d.filename}</span>
               <button
-                onClick={() => handleDelete(d.id, d.filename)}
-                className="text-muted hover:text-red-600 text-sm leading-none ml-0.5 cursor-pointer"
-                title="Delete"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete(d.id, d.filename);
+                }}
+                className="text-neutral-500 hover:text-red-400 ml-1 cursor-pointer"
+                title="Delete from index"
               >
-                &times;
+                <X className="h-3 w-3" />
               </button>
             </span>
           ))
