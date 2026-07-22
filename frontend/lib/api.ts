@@ -59,3 +59,15 @@ export async function testConnection() {
   if (!res.ok) throw new Error(`Test connection failed: ${res.status}`);
   return res.json();
 }
+
+export async function checkBackend(): Promise<boolean> {
+  try {
+    const res = await fetch(`${BASE}/health`, {
+      signal: AbortSignal.timeout(2000),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+

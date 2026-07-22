@@ -1,22 +1,60 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import TopBar from "@/components/TopBar";
 import SearchBox from "@/components/SearchBox";
 import DocumentGrid from "@/components/DocumentGrid";
 import AnswerBox from "@/components/AnswerBox";
 import UploadZone from "@/components/UploadZone";
 import SettingsModal from "@/components/SettingsModal";
-import { search } from "@/lib/api";
+import { search, checkBackend } from "@/lib/api";
 import { DocResult } from "@/components/DocumentCard";
 
 export default function SearchAppPage() {
+  const [backendConnected, setBackendConnected] = useState<boolean | null>(null);
   const [query, setQuery] = useState("");
   const [documents, setDocuments] = useState<DocResult[]>([]);
   const [answer, setAnswer] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  useEffect(() => {
+    async function verifyBackend() {
+      const isOk = await checkBackend();
+      setBackendConnected(isOk);
+    }
+    verifyBackend();
+  }, []);
+
+  if (backendConnected === null) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-sand">
+        <p className="text-muted text-sm">Connecting…</p>
+      </div>
+    );
+  }
+
+  if (backendConnected === false) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-sand gap-4 text-center px-6">
+        <span className="text-5xl">🏝</span>
+        <h2 className="font-serif text-2xl text-teal">Holms isn't running on this machine.</h2>
+        <p className="text-muted text-sm max-w-xs">
+          The app needs to be running locally to access your documents.
+        </p>
+        <a
+          href="https://github.com/Ameya79/Holms/releases/latest"
+          className="bg-drift text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Download the app
+        </a>
+        <p className="text-muted text-xs">Already installed? Launch it from your system tray.</p>
+      </div>
+    );
+  }
 
   const handleSearch = async (q: string) => {
     if (!q.trim()) return;
@@ -81,7 +119,7 @@ export default function SearchAppPage() {
         )}
       </main>
 
-      {/* Bottom Upload & File Pills Area (Clean, no floating overlapping dock) */}
+      {/* Bottom Upload & File Pills Area */}
       <UploadZone />
 
       {/* Settings Modal */}
