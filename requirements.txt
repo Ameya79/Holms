@@ -12,3 +12,5 @@ anthropic
 openai
 groq
 google-genai
+pystray
+pyinstaller
