@@ -8,6 +8,7 @@ import AnswerBox from "@/components/AnswerBox";
 import UploadZone from "@/components/UploadZone";
 import SettingsModal from "@/components/SettingsModal";
 import { search } from "@/lib/api";
+import { requestPersistentStorage } from "@/lib/storage";
 import { DocResult } from "@/components/DocumentCard";
 
 export default function SearchAppPage() {
@@ -17,6 +18,11 @@ export default function SearchAppPage() {
   const [loading, setLoading] = useState(false);
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  useEffect(() => {
+    requestPersistentStorage();
+  }, []);
+
 
   const handleSearch = async (q: string) => {
     if (!q.trim()) return;

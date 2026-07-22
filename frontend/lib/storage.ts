@@ -1,6 +1,7 @@
 /**
- * In-Browser Storage & Hybrid Search Engine for Holms (100% Local).
- * Uses browser IndexedDB for document persistence and local search indexing.
+ * In-Browser Permanent Local Storage & Search Engine for Holms.
+ * Uses Permanent Storage API (navigator.storage.persist) + IndexedDB
+ * to ensure local data is NEVER evicted by browser cache clearing.
  */
 
 export interface IndexedChunk {
@@ -24,6 +25,24 @@ export interface StoredDocument {
 const DB_NAME = "holms_local_db";
 const DB_VERSION = 1;
 const STORE_DOCS = "documents";
+
+/** Request permanent, non-evictable OS disk storage from the browser */
+export async function requestPersistentStorage(): Promise<boolean> {
+  if (typeof window !== "undefined" && navigator.storage && navigator.storage.persist) {
+    try {
+      const isPersisted = await navigator.storage.persisted();
+      if (!isPersisted) {
+        const granted = await navigator.storage.persist();
+        console.log(`[Holms] Persistent storage granted: ${granted}`);
+        return granted;
+      }
+      return isPersisted;
+    } catch (e) {
+      console.warn("[Holms] Persistent storage check failed:", e);
+    }
+  }
+  return false;
+}
 
 function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -57,7 +76,6 @@ export function getFileType(filename: string): string {
 
 /** Split text into sentence-aware chunks (~300 words) */
 export function chunkText(text: string, targetWords = 300, overlapSentences = 1): string[] {
-
   const sentences = text.split(/(?<=[.!?])\s+/).filter((s) => s.trim().length > 0);
   if (sentences.length === 0) return [text];
 
@@ -83,8 +101,9 @@ export function chunkText(text: string, targetWords = 300, overlapSentences = 1)
   return chunks;
 }
 
-/** Add document to browser IndexedDB */
+/** Add document to permanent browser storage */
 export async function saveDocument(filename: string, content: string, sizeBytes: number): Promise<StoredDocument> {
+  await requestPersistentStorage();
   const db = await openDB();
   const docId = `doc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
   const textChunks = chunkText(content);
@@ -188,7 +207,6 @@ export async function searchLocalDocuments(query: string) {
     };
   });
 
-  // Filter matched documents or fallback to top items
   const matched = scoredDocs
     .filter((d) => d.best_score > 0)
     .sort((a, b) => b.best_score - a.best_score);
