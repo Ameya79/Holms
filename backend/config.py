@@ -1,9 +1,23 @@
 import json
 import os
+import sys
 from pathlib import Path
 
+def get_app_data_dir() -> Path:
+    """Return OS-standard user app data directory for Holms."""
+    if getattr(sys, "frozen", False):
+        if sys.platform == "win32":
+            base = Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local"))
+            return base / "Holms" / "data"
+        elif sys.platform == "darwin":
+            return Path.home() / "Library" / "Application Support" / "Holms" / "data"
+        else:
+            return Path.home() / ".config" / "holms" / "data"
+    return Path(__file__).parent.parent / "data"
+
 BASE_DIR = Path(__file__).parent.parent
-DATA_DIR = BASE_DIR / "data"
+DATA_DIR = get_app_data_dir()
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 CONFIG_FILE = DATA_DIR / "config.json"
 
 DEFAULT_CONFIG = {

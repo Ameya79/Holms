@@ -14,3 +14,5 @@ groq
 google-genai
 pystray
 pyinstaller
+pywebview
+

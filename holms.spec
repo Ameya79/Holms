@@ -3,7 +3,7 @@ import sys
 block_cipher = None
 
 a = Analysis(
-    ["tray.py"],
+    ["desktop.py"],
     pathex=["."],
     binaries=[],
     datas=[
@@ -12,10 +12,8 @@ a = Analysis(
     hiddenimports=[
         "fastembed",
         "sqlite_vec",
+        "webview",
         "PIL._tkinter_finder",
-        "pystray._darwin",
-        "pystray._win32",
-        "pystray._xorg",
         "uvicorn.logging",
         "uvicorn.loops",
         "uvicorn.loops.auto",
@@ -50,6 +48,6 @@ if sys.platform == "darwin":
         icon="assets/icon.icns",
         bundle_identifier="com.holms.app",
         info_plist={
-            "LSUIElement": True,
+            "LSUIElement": False,
         },
     )
