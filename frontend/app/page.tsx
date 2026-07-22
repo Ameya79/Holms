@@ -8,7 +8,7 @@ import FeatureSection from "@/components/ui/stack-feature-section";
 import Infographics from "@/components/Infographics";
 import { Button } from "@/components/ui/button";
 import { FaGithub } from "react-icons/fa";
-import { Download, ArrowRight, Shield, Zap, Lock, CheckCircle2, Search, FileText } from "lucide-react";
+import { Download, ArrowRight, Shield, Zap, Lock } from "lucide-react";
 
 export default function LandingPage() {
   const [installPrompt, setInstallPrompt] = useState<any>(null);
@@ -34,7 +34,7 @@ export default function LandingPage() {
 
   return (
     <main className="min-h-screen flex flex-col bg-sand text-ink font-sans selection:bg-match selection:text-ink">
-      {/* Navigation Header */}
+      {/* Header */}
       <header className="max-w-6xl mx-auto w-full px-6 py-4 flex items-center justify-between z-20 border-b border-teal/15">
         <div className="flex items-center gap-3">
           <Logo size={36} />
@@ -61,21 +61,16 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative pt-6 pb-8 flex flex-col items-center justify-center text-center px-6 max-w-4xl mx-auto">
-        <div className="mb-3 inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-foam border border-teal/20 text-teal text-xs font-medium">
-          <span className="w-2 h-2 rounded-full bg-drift"></span>
-          Your Personal File Retriever
-        </div>
-
+      <section className="relative pt-6 pb-6 flex flex-col items-center justify-center text-center px-6 max-w-4xl mx-auto">
         {/* Hook Headline */}
         <h1 className="font-serif text-4xl sm:text-6xl text-teal tracking-wide mb-3 max-w-3xl leading-[1.08]">
           Stop fishing for <br />
           <span className="italic font-light">lost documents.</span>
         </h1>
 
-        {/* Non-Technical Relatable Subtitle */}
+        {/* Non-Technical Subtitle without em-dashes */}
         <p className="text-muted text-sm sm:text-base max-w-2xl mb-5 leading-relaxed font-sans">
-          We save files and forget where they went. Hostel notices, tax receipts, rental agreements, medical bills—buried deep in Downloads. Holms reels them back in instantly by what they mean.
+          We save files and forget where they went. Hostel notices, tax receipts, rental agreements, and medical bills often get buried deep in your Downloads folder. Holms reels them back in instantly by what they mean.
         </p>
 
         {/* Action Buttons */}
@@ -91,7 +86,7 @@ export default function LandingPage() {
           </Button>
         </div>
 
-        {/* Hero Artwork 1: Fisherman fishing for documents (Prominent & Visible Above the Fold) */}
+        {/* Hero Fisherman Artwork (Prominent & Visible Above the Fold) */}
         <div className="w-full max-w-xl relative">
           <Image
             src="/hero_illustration.png"
@@ -109,7 +104,7 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-center gap-6 text-teal font-medium text-xs sm:text-sm text-center">
           <span className="flex items-center gap-2">
             <Lock className="h-4 w-4 text-drift" />
-            100% Private on Your Machine
+            100% Private on Your Computer
           </span>
           <span className="text-drift/40 hidden sm:inline">•</span>
           <span className="flex items-center gap-2">
@@ -119,7 +114,7 @@ export default function LandingPage() {
           <span className="text-drift/40 hidden sm:inline">•</span>
           <span className="flex items-center gap-2">
             <Shield className="h-4 w-4 text-drift" />
-            Reads Scanned Photo Notices
+            Reads Scanned Notice Photos
           </span>
         </div>
       </div>
@@ -139,7 +134,7 @@ export default function LandingPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-          {/* Hero Artwork 2: Tank of Floating Documents (Transparent background) */}
+          {/* Tank of Floating Documents (Transparent background) */}
           <div className="relative flex justify-center">
             <Image
               src="/explanation_tank.png"
@@ -150,7 +145,7 @@ export default function LandingPage() {
             />
           </div>
 
-          {/* Non-Technical Problem Cards */}
+          {/* Problem Cards */}
           <div className="space-y-5">
             <div className="bg-foam border border-teal/20 rounded-2xl p-5 shadow-xs">
               <h3 className="font-semibold text-teal text-base mb-1">Standard search only looks at filenames</h3>
@@ -179,29 +174,29 @@ export default function LandingPage() {
             How Holms turns your files into searchable answers
           </h2>
           <p className="text-muted text-sm max-w-xl mx-auto">
-            Drop in any file and Holms transforms raw text and photo notices into a private, local search index on your computer.
+            Drop in any file and Holms transforms raw text and photo notices into a private search index right on your laptop.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-          {/* Non-Technical Solution Cards */}
+          {/* Solution Cards */}
           <div className="space-y-5 order-2 md:order-1">
             <div className="bg-foam border border-teal/20 rounded-2xl p-5 shadow-xs">
               <h3 className="font-semibold text-teal text-base mb-1">Search by concepts, not just words</h3>
               <p className="text-muted text-xs leading-relaxed">
-                Searching "rent receipt" will match lease PDFs containing "monthly payment terms"—even if the exact word "rent" is never mentioned.
+                Searching "rent receipt" will match lease PDFs containing "monthly payment terms", even if the exact word "rent" is never mentioned.
               </p>
             </div>
 
             <div className="bg-foam border border-teal/20 rounded-2xl p-5 shadow-xs">
               <h3 className="font-semibold text-teal text-base mb-1">Open original files with one click</h3>
               <p className="text-muted text-xs leading-relaxed">
-                Every search result surfaces the actual document card with a single-click button to open or download the original file.
+                Every search result surfaces the actual document card with a single click button to open or download the original file.
               </p>
             </div>
           </div>
 
-          {/* Hero Artwork 3: Document Indexing Transformation (Transparent background) */}
+          {/* Document Indexing Transformation Artwork */}
           <div className="relative flex justify-center order-1 md:order-2">
             <Image
               src="/doc_transform.png"
@@ -214,10 +209,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Non-Technical Infographics */}
+      {/* 3 Step Process with Custom Step Illustrations */}
       <Infographics />
 
-      {/* Tech Stack Orbit Feature Section - Positioned Below */}
+      {/* Tech Stack Orbit Feature Section */}
       <section className="px-6 max-w-6xl mx-auto">
         <div className="text-center pt-8">
           <span className="text-xs font-mono font-semibold uppercase tracking-wider text-drift">
