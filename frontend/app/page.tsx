@@ -28,9 +28,10 @@ export default function LandingPage() {
       await installPrompt.userChoice;
       setInstallPrompt(null);
     } else {
-      window.location.href = "/app";
+      window.open("https://github.com/Ameya79/Holms/releases/latest", "_blank");
     }
   };
+
 
   return (
     <main className="min-h-screen flex flex-col bg-sand text-ink font-sans selection:bg-match selection:text-ink">
