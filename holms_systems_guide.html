@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Holms — Systems & Architecture Guide</title>
+<style>
+  :root{
+    --bg: #0f1417;
+    --bg-panel: #161d22;
+    --bg-code: #0a0d0f;
+    --ink: #dce4e6;
+    --ink-dim: #8ea0a6;
+    --line: #263238;
+    --signal: #5fd0c0;
+    --signal-dim: #3a8a80;
+    --warn: #e0a458;
+    --mono: "JetBrains Mono","SF Mono",Consolas,monospace;
+    --sans: "Inter","Segoe UI",sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:var(--sans); line-height:1.65; font-size:16px;
+  }
+  a{color:var(--signal);}
+
+  /* layout */
+  .shell{display:flex; min-height:100vh;}
+  nav.sidebar{
+    width:270px; flex-shrink:0; background:var(--bg-panel);
+    border-right:1px solid var(--line); padding:28px 0;
+    position:sticky; top:0; height:100vh; overflow-y:auto;
+  }
+  nav.sidebar .brand{
+    padding:0 22px 20px 22px; border-bottom:1px solid var(--line); margin-bottom:14px;
+  }
+  nav.sidebar .brand .tag{
+    font-family:var(--mono); font-size:11px; letter-spacing:.14em; color:var(--signal); text-transform:uppercase;
+  }
+  nav.sidebar .brand h1{font-size:18px; margin:6px 0 0 0; font-weight:600;}
+  nav.sidebar ul{list-style:none; margin:0; padding:0;}
+  nav.sidebar li a{
+    display:block; padding:9px 22px; color:var(--ink-dim); text-decoration:none;
+    font-size:13.5px; border-left:2px solid transparent;
+  }
+  nav.sidebar li a:hover{color:var(--ink); border-left-color:var(--signal-dim); background:rgba(95,208,192,.05);}
+  nav.sidebar li a.num{font-family:var(--mono); color:var(--signal); margin-right:8px; font-size:12px;}
+
+  main{flex:1; max-width:920px; padding:56px 64px 120px 64px;}
+  @media (max-width:900px){
+    nav.sidebar{display:none;}
+    main{padding:32px 20px 80px;}
+  }
+
+  section{margin-bottom:74px; scroll-margin-top:24px;}
+  section h2{
+    font-size:26px; margin:0 0 6px 0; font-weight:700; letter-spacing:-.01em;
+  }
+  section .eyebrow{
+    font-family:var(--mono); font-size:12px; color:var(--signal); letter-spacing:.1em; text-transform:uppercase; margin-bottom:8px; display:block;
+  }
+  section p{color:var(--ink); max-width:75ch;}
+  section p.dim{color:var(--ink-dim);}
+  h3{font-size:19px; margin:32px 0 10px 0; color:var(--ink); border-left:3px solid var(--signal-dim); padding-left:10px;}
+  h4{font-size:15px; margin:20px 0 8px 0; color:var(--signal);}
+
+  .callout{
+    background:rgba(95,208,192,.06); border:1px solid rgba(95,208,192,.25);
+    border-radius:6px; padding:14px 18px; margin:16px 0; font-size:14.5px;
+  }
+  .callout.warn{background:rgba(224,164,88,.07); border-color:rgba(224,164,88,.3);}
+  .callout strong{color:var(--signal);}
+  .callout.warn strong{color:var(--warn);}
+
+  pre{
+    background:var(--bg-code); border:1px solid var(--line); border-radius:6px;
+    padding:16px 18px; overflow-x:auto; font-family:var(--mono); font-size:13px;
+    line-height:1.55; margin:14px 0;
+  }
+  code{font-family:var(--mono); font-size:.9em; background:rgba(255,255,255,.06); padding:1px 5px; border-radius:3px;}
+  pre code{background:none; padding:0;}
+
+  table{border-collapse:collapse; width:100%; margin:16px 0; font-size:14px;}
+  th,td{border:1px solid var(--line); padding:8px 12px; text-align:left; vertical-align:top;}
+  th{background:var(--bg-panel); color:var(--signal); font-family:var(--mono); font-size:12px; text-transform:uppercase; letter-spacing:.04em;}
+  tr:nth-child(even) td{background:rgba(255,255,255,.015);}
+
+  .flow{
+    font-family:var(--mono); font-size:13px; background:var(--bg-code);
+    border:1px solid var(--line); border-radius:6px; padding:20px;
+    white-space:pre; overflow-x:auto; color:var(--ink-dim); margin:16px 0;
+  }
+  .flow .hl{color:var(--signal);}
+  .flow .warn{color:var(--warn);}
+
+  .badge{
+    display:inline-block; font-family:var(--mono); font-size:10px; padding:2px 6px; border-radius:3px;
+    background:rgba(95,208,192,.1); color:var(--signal); border:1px solid var(--signal-dim);
+  }
+
+  ol.steps{padding-left:0; list-style:none; counter-reset:step;}
+  ol.steps li{
+    counter-increment:step; padding-left:38px; position:relative; margin-bottom:14px;
+  }
+  ol.steps li::before{
+    content:counter(step); position:absolute; left:0; top:0;
+    font-family:var(--mono); font-size:12px; color:var(--signal);
+    border:1px solid var(--signal-dim); border-radius:50%; width:22px; height:22px;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  .top-banner{
+    background:linear-gradient(180deg, rgba(95,208,192,.08), transparent);
+    border-bottom:1px solid var(--line); padding:48px 64px 34px;
+  }
+  @media (max-width:900px){.top-banner{padding:32px 20px 24px;}}
+  .top-banner .eyebrow{font-family:var(--mono); font-size:12px; color:var(--signal); letter-spacing:.12em; text-transform:uppercase;}
+  .top-banner h1{font-size:34px; margin:8px 0 10px; font-weight:800; letter-spacing:-.02em;}
+  .top-banner p{color:var(--ink-dim); max-width:70ch; font-size:15px;}
+
+  .pill{display:inline-block; font-family:var(--mono); font-size:11px; padding:2px 8px; border-radius:20px; border:1px solid var(--signal-dim); color:var(--signal); margin-right:6px;}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="sidebar">
+    <div class="brand">
+      <span class="tag">Systems Guide</span>
+      <h1>Holms Architecture</h1>
+    </div>
+    <ul>
+      <li><a href="#overview"><span class="num">00</span>Orientation & Philosophy</a></li>
+      <li><a href="#tech-stack"><span class="num">01</span>Technology Stack</a></li>
+      <li><a href="#sys-design"><span class="num">02</span>System Architecture & Flow</a></li>
+      <li><a href="#ingestion"><span class="num">03</span>Ingestion & OCR Pipeline</a></li>
+      <li><a href="#embeddings-db"><span class="num">04</span>Embeddings & Vector Store</a></li>
+      <li><a href="#retrieval"><span class="num">05</span>Hybrid Search & RRF Engine</a></li>
+      <li><a href="#llm-rag"><span class="num">06</span>Single-Pass RAG & LLM Adapter</a></li>
+      <li><a href="#frontend"><span class="num">07</span>Next.js Frontend & UI State</a></li>
+      <li><a href="#registry"><span class="num">08</span>Complete Function Registry</a></li>
+      <li><a href="#startup"><span class="num">09</span>Startup & Diagnostics</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <div class="top-banner" style="margin:-56px -64px 40px -64px;">
+      <span class="eyebrow">Holms Codebase · Systems Deep Dive</span>
+      <h1>How Holms Works: Complete Technical Guide</h1>
+      <p>A comprehensive, function-by-function architectural blueprint of Holms — a privacy-first, single-tenant local document search engine and RAG assistant. Covers ingestion, OCR, FastEmbed vectors, SQLite FTS5 + sqlite-vec, RRF ranking, multi-provider LLM synthesis, and Next.js frontend binding.</p>
+    </div>
+
+    <!-- 00 -->
+    <section id="overview">
+      <span class="eyebrow">00 — Orientation</span>
+      <h2>Product Mental Model & Principles</h2>
+      <p>Holms is designed under a <strong>single-tenant, local-first</strong> architecture per PRD §2. Every installation of Holms runs on the user's own machine. Your files, document chunks, FTS index, and vector embeddings reside strictly inside <code>data/index.db</code> on local disk.</p>
+      
+      <div class="callout">
+        <strong>The Core Architectural Promise:</strong> Holms operates in two distinct operational modes without requiring multi-tenant cloud authentication or external storage databases:
+        <ol style="margin: 8px 0 0 0; padding-left: 20px;">
+          <li><strong>Search-Only Mode (Zero-Cost / No API Key):</strong> Ingestion, OCR, FastEmbed vectors, FTS5 keyword indexing, and hybrid retrieval run 100% locally. Returns ranked document cards with snippet highlights directly without calling any remote API.</li>
+          <li><strong>AI Answer Mode (BYO Key):</strong> Performs a single LLM call (Anthropic Sonnet 3.7 / Claude 3.5, Gemini 2.0 Flash, OpenAI GPT-4o-mini, or Groq Llama 3.3) to verify retrieved candidate chunks and synthesize a grounded natural language answer with document source citations.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- 01 -->
+    <section id="tech-stack">
+      <span class="eyebrow">01 — Core Stack</span>
+      <h2>Technology Stack Breakdown</h2>
+      <p class="dim">The exact libraries powering Holms, divided by layer and responsibility.</p>
+
+      <h3>Backend Stack (Python 3.10+)</h3>
+      <table>
+        <tr><th>Package</th><th>Version / Spec</th><th>Technical Role in Holms</th></tr>
+        <tr><td><code>fastapi</code></td><td>ASGI Web Framework</td><td>Provides REST API endpoints (<code>/upload</code>, <code>/chat</code>, <code>/documents</code>, <code>/settings</code>), file serving, and CORS setup.</td></tr>
+        <tr><td><code>uvicorn</code></td><td>ASGI Server</td><td>Executes the FastAPI application on <code>127.0.0.1:8000</code>.</td></tr>
+        <tr><td><code>fitz</code> (PyMuPDF)</td><td>C-accelerated PDF Engine</td><td>Extracts native text and renders scanned pages to 300 DPI images for OCR.</td></tr>
+        <tr><td><code>python-docx</code></td><td>Document Reader</td><td>Parses structured paragraph text from <code>.docx</code> Word documents.</td></tr>
+        <tr><td><code>pytesseract</code> + PIL</td><td>OCR Wrapper</td><td>Wraps Google Tesseract OCR binary to recognize text in image notices and scanned PDFs.</td></tr>
+        <tr><td><code>fastembed</code></td><td>ONNX Runtime Vector Engine</td><td>Runs <code>BAAI/bge-small-en-v1.5</code> locally without PyTorch overhead (384-dimensional dense vectors).</td></tr>
+        <tr><td><code>sqlite-vec</code></td><td>C Extension for SQLite</td><td>Provides <code>vec0</code> virtual table for high-speed SIMD vector KNN search directly inside SQLite.</td></tr>
+        <tr><td><code>sqlite3</code> (FTS5)</td><td>Built-in Storage Engine</td><td>Stores document metadata, chunks, and full-text keyword index using BM25 ranking.</td></tr>
+        <tr><td><code>numpy</code></td><td>Matrix Mathematics</td><td>Serves as vector fallback math engine when <code>sqlite-vec</code> binary extension is unavailable.</td></tr>
+        <tr><td><code>google-genai</code>, <code>anthropic</code>, <code>openai</code>, <code>groq</code></td><td>Provider API Clients</td><td>Supplies multi-provider LLM API connectivity for AI answer generation.</td></tr>
+      </table>
+
+      <h3>Frontend Stack (Web Application UI)</h3>
+      <table>
+        <tr><th>Package</th><th>Version / Framework</th><th>Technical Role in Holms</th></tr>
+        <tr><td><code>Next.js 15</code></td><td>React 19 App Router</td><td>App Router architecture supplying the landing page (<code>/</code>) and search application (<code>/app</code>).</td></tr>
+        <tr><td><code>TypeScript</code></td><td>Strict Type Checking</td><td>Defines API contract types (<code>DocResult</code>, <code>ChatRequest</code>, <code>SettingsRequest</code>).</td></tr>
+        <tr><td><code>Tailwind CSS</code></td><td>Utility Styling System</td><td>Implements the warm sand, ocean wave, teal, and foam color token design system.</td></tr>
+        <tr><td><code>Lucide React</code> + <code>React Icons</code></td><td>UI Vector Icons</td><td>Provides visual indicators for file badges, settings gears, upload zones, and search states.</td></tr>
+      </table>
+    </section>
+
+    <!-- 02 -->
+    <section id="sys-design">
+      <span class="eyebrow">02 — System Design</span>
+      <h2>System Architecture & End-to-End Flow</h2>
+      <p>How data moves from raw user files on disk through the processing pipeline into SQLite indexes, and how search queries retrieve and synthesize answers.</p>
+
+      <div class="flow">
+[USER BROWSER / NEXT.JS UI (Port 3000 or 8000)]
+   │
+   ├──▶ Upload File (POST /upload)
+   │        │
+   │        ▼
+   │   [FASTAPI: main.py] ──▶ Save to data/documents/filename
+   │        │
+   │        ▼
+   │   [INGESTION: ingestion.py]
+   │        ├── 1. Text Extraction (fitz / python-docx / txt)
+   │        ├── 2. Density Check (< 20 chars triggers PyMuPDF 300 DPI render + Tesseract OCR)
+   │        ├── 3. Sentence-Aware Chunking (split_sentences -> ~300 words + 1 sentence overlap)
+   │        ├── 4. Local Embedding (fastembed ONNX -> BAAI/bge-small-en-v1.5 -> 384 float vector)
+   │        └── 5. Transaction Write to SQLite (documents, chunks, chunks_fts, vec_chunks)
+   │
+   └──▶ Query Search (POST /chat {"query": "..."})
+            │
+            ▼
+       [SEARCH ORCHESTRATION: search.py]
+            ├── 1. Query Vectorization (embed_query with BGE instruction prefix)
+            ├── 2. Parallel BM25 Search (SQLite FTS5 MATCH -> top 60 candidate chunk IDs)
+            ├── 3. Parallel Vector Search (sqlite-vec vec0 MATCH or NumPy cosine matrix dot)
+            ├── 4. Reciprocal Rank Fusion (RRF: sum(1 / (60 + rank)) -> top 16 chunks)
+            ├── 5. Document Aggregation (group chunks by doc_id, find top snippet & best score)
+            │
+            ├──▶ [NO API KEY CONFIGURED] ──▶ Return { mode: "search_only", documents: [...] }
+            │
+            └──▶ [API KEY CONFIGURED]
+                     │
+                     ▼
+                [LLM ADAPTER: llm.py]
+                     ├── Build Prompt (system verification prompt + excerpt formatted chunks)
+                     ├── Dispatch Single Call (Anthropic / Gemini / OpenAI / Groq)
+                     └── Return { mode: "answered", answer: "...", documents: [...] }
+      </div>
+    </section>
+
+    <!-- 03 -->
+    <section id="ingestion">
+      <span class="eyebrow">03 — Ingestion Pipeline</span>
+      <h2>File Ingestion & Silent OCR Pipeline</h2>
+      <p>The ingestion module (<code>backend/ingestion.py</code>) processes incoming <code>.pdf</code>, <code>.docx</code>, <code>.png</code>, <code>.jpg</code>, <code>.txt</code>, and <code>.md</code> files without requiring manual user intervention.</p>
+
+      <h3>1. Text Extraction & Native Density Check</h3>
+      <p>When a PDF page is parsed by <code>extract_text_from_pdf()</code>, native text length is inspected. If a page yields fewer than 20 characters of text, Holms flags the page as scanned/image-based and routes it to OCR:</p>
+      <pre><code># backend/ingestion.py - PDF text extraction & OCR trigger
+for page in doc:
+    text = page.get_text().strip()
+    if len(text) < 20:   # Threshold check from TRD §3
+        ocr_used = True
+        pix = page.get_pixmap(dpi=300)   # Render high-res 300 DPI buffer
+        img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+        text = pytesseract.image_to_string(img)
+    full_text.append(text)</code></pre>
+
+      <h3>2. Sentence-Aware Chunking Algorithm</h3>
+      <p>Rather than splitting blindly by character count (which ruptures sentences and ruins embeddings), <code>chunk_text()</code> uses Regex boundary splitting <code>re.split(r'(?&lt;=[.!?])\s+', text)</code> to build sentence groups up to ~300 words with a 1-sentence overlap:</p>
+      <pre><code># backend/ingestion.py - Sentence-aware chunking
+def chunk_text(text: str, target_words: int = 300, overlap_sentences: int = 1) -> list[str]:
+    sentences = split_sentences(text)
+    chunks, current = [], []
+    current_len = 0
+    for sentence in sentences:
+        words = len(sentence.split())
+        if current_len + words > target_words and current:
+            chunks.append(" ".join(current))
+            current = current[-overlap_sentences:]   # Overlap carry-forward
+            current_len = sum(len(s.split()) for s in current)
+        current.append(sentence)
+        current_len += words
+    if current:
+        chunks.append(" ".join(current))
+    return chunks</code></pre>
+    </section>
+
+    <!-- 04 -->
+    <section id="embeddings-db">
+      <span class="eyebrow">04 — Vector Engine & Database</span>
+      <h2>Embeddings & SQLite Hybrid Storage</h2>
+      <p>Holms utilizes <code>fastembed</code> with the <code>BAAI/bge-small-en-v1.5</code> model running ONNX CPU inference. Model initialization happens once on startup (~130 MB ONNX weights file cached locally).</p>
+
+      <div class="callout warn">
+        <strong>Asymmetric BGE Embedding Rule:</strong> BGE models require an instruction prefix on <em>search queries</em> to optimize asymmetric retrieval, but document chunks must be embedded as <em>raw plain text</em>.
+      </div>
+
+      <pre><code># backend/embeddings.py - Asymmetric embedding handling
+def embed_documents(chunks: list[str]) -> list[np.ndarray]:
+    return list(_embedder.embed(chunks)) # Plain text without prefix
+
+def embed_query(query: str) -> np.ndarray:
+    prefixed = f"Represent this sentence for searching relevant passages: {query}"
+    return list(_embedder.embed([prefixed]))[0]</code></pre>
+
+      <h3>Database Schema (<code>data/index.db</code>)</h3>
+      <p>The database initialization in <code>backend/database.py</code> configures WAL mode (Write-Ahead Logging) and constructs four interconnected tables:</p>
+      
+      <pre><code>-- 1. Document metadata master table
+CREATE TABLE documents (
+    id TEXT PRIMARY KEY,
+    filename TEXT NOT NULL,
+    filepath TEXT,
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ocr_used BOOLEAN DEFAULT 0
+);
+
+-- 2. Chunk text & raw binary embedding store
+CREATE TABLE chunks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    doc_id TEXT NOT NULL,
+    chunk_index INTEGER NOT NULL,
+    text TEXT NOT NULL,
+    embedding BLOB,  -- Float32 array serialized via struct.pack / numpy.tobytes
+    FOREIGN KEY(doc_id) REFERENCES documents(id) ON DELETE CASCADE
+);
+
+-- 3. SQLite FTS5 Full-Text Search virtual table (BM25 keyword index)
+CREATE VIRTUAL TABLE chunks_fts USING fts5(
+    text,
+    content='chunks',
+    content_rowid='id'
+);
+
+-- 4. sqlite-vec extension vec0 virtual table (Dense vector KNN search)
+CREATE VIRTUAL TABLE vec_chunks USING vec0(
+    id INTEGER PRIMARY KEY,
+    embedding float[384]
+);</code></pre>
+    </section>
+
+    <!-- 05 -->
+    <section id="retrieval">
+      <span class="eyebrow">05 — Retrieval Engine</span>
+      <h2>Hybrid Search & Reciprocal Rank Fusion (RRF)</h2>
+      <p>Pure vector search fails on exact filenames or serial numbers, while pure keyword search fails on semantic intent ("what did I pay last month"). Holms runs both search paradigms in parallel and fuses their rankings using Reciprocal Rank Fusion (RRF).</p>
+
+      <h3>1. BM25 Keyword Retrieval via FTS5</h3>
+      <p><code>search_bm25()</code> quotes query terms and queries SQLite's built-in <code>bm25(chunks_fts)</code> function to return top 60 sparse matches.</p>
+
+      <h3>2. Vector KNN Retrieval & NumPy Fallback</h3>
+      <p><code>search_vector()</code> first attempts high-speed SIMD vector search using <code>sqlite-vec</code>'s <code>vec_chunks</code> table. If the binary extension is unavailable on the OS, it falls back to <code>_numpy_brute_force()</code> which computes cosine similarity across all chunk blobs using vector dot products:</p>
+      <pre><code># backend/search.py - Cosine similarity matrix multiplication fallback
+query_norm = np.linalg.norm(query_vec)
+vec_norms = np.linalg.norm(vectors, axis=1)
+sims = (vectors @ query_vec) / (vec_norms * query_norm)
+top_k_indices = np.argsort(-sims)[:k]</code></pre>
+
+      <h3>3. Reciprocal Rank Fusion (RRF) Math</h3>
+      <p>RRF merges rankings by position score rather than raw distance metrics (which live on incompatible scales):</p>
+      <div class="callout">
+        $$\text{RRF\_Score}(d) = \sum_{r \in \text{Rankers}} \frac{1}{k_{const} + \text{rank}_r(d)}$$
+        Where $k_{const} = 60$. A document ranked #1 in BM25 and #3 in Vector search receives:
+        $$\text{Score} = \frac{1}{60 + 1} + \frac{1}{60 + 3} = 0.01639 + 0.01587 = 0.03226$$
+      </div>
+
+      <pre><code># backend/search.py - Reciprocal Rank Fusion implementation
+def reciprocal_rank_fusion(bm25_results, vec_results, k_constant=60):
+    scores = {}
+    for rank, res in enumerate(bm25_results):
+        cid = res["id"]
+        scores[cid] = scores.get(cid, 0.0) + 1.0 / (k_constant + rank + 1)
+    for rank, res in enumerate(vec_results):
+        cid = res["id"]
+        scores[cid] = scores.get(cid, 0.0) + 1.0 / (k_constant + rank + 1)
+    return scores</code></pre>
+    </section>
+
+    <!-- 06 -->
+    <section id="llm-rag">
+      <span class="eyebrow">06 — Synthesis Engine</span>
+      <h2>Single-Pass RAG & LLM Provider Adapter</h2>
+      <p>To eliminate latency and cost, Holms guarantees <strong>exactly one LLM API call per query</strong>. Reranking, verification, and answer generation are executed in a single pass.</p>
+
+      <h3>Prompt Engineering (`backend/llm.py`)</h3>
+      <pre><code>def build_prompt(query: str, shortlist) -> str:
+    return f"""Below are candidate excerpts retrieved for a question. Some may be irrelevant — ignore those.
+Answer using only the relevant excerpts. Cite which source document(s) you used.
+If none are relevant, say so.
+
+{format_chunks(shortlist)}
+
+Question: {query}"""</code></pre>
+
+      <h3>Multi-Provider Supported Clients</h3>
+      <table>
+        <tr><th>Provider Key</th><th>SDK Used</th><th>Default Model</th></tr>
+        <tr><td><code>anthropic</code></td><td><code>anthropic</code></td><td><code>claude-sonnet-4-6</code></td></tr>
+        <tr><td><code>gemini</code></td><td><code>google-genai</code></td><td><code>gemini-2.0-flash</code></td></tr>
+        <tr><td><code>openai</code></td><td><code>openai</code></td><td><code>gpt-4o-mini</code></td></tr>
+        <tr><td><code>groq</code></td><td><code>groq</code></td><td><code>llama-3.3-70b-versatile</code></td></tr>
+      </table>
+    </section>
+
+    <!-- 07 -->
+    <section id="frontend">
+      <span class="eyebrow">07 — Client Architecture</span>
+      <h2>Next.js Frontend & UI Integration</h2>
+      <p>The client is built with Next.js 15 App Router using client components and static export capabilities (`output: 'export'`). Data communication between Next.js and FastAPI occurs via `lib/api.ts` fetch helpers.</p>
+
+      <h3>Component Breakdown & Data Flow</h3>
+      <ul>
+        <li><code>app/app/page.tsx</code>: Main container state orchestrator holding <code>query</code>, <code>documents</code>, <code>answer</code>, <code>loading</code>, and <code>isSettingsOpen</code>.</li>
+        <li><code>components/TopBar.tsx</code>: Header displaying connection status and triggering settings modal or upload file dialog.</li>
+        <li><code>components/SearchBox.tsx</code>: Input bar supporting keyboard submit (Enter key), loading spinner, and quick pre-filled prompt pills.</li>
+        <li><code>components/DocumentCard.tsx</code>: Visual result card displaying file type badges (<span class="badge">PDF</span> <span class="badge">DOCX</span> <span class="badge">IMG</span> <span class="badge">TXT</span>), file size, relevance percentage match score, highlighted snippet, and collapsible chunk inspector.</li>
+        <li><code>components/AnswerBox.tsx</code>: Container rendering AI synthesis answer markdown with document source citations.</li>
+        <li><code>components/UploadZone.tsx</code>: Bottom bar for file drag-and-drop uploads, showing real-time indexing status feedback.</li>
+        <li><code>components/SettingsModal.tsx</code>: Provider selector and API key manager with live connection testing via <code>/settings/test</code>.</li>
+      </ul>
+    </section>
+
+    <!-- 08 -->
+    <section id="registry">
+      <span class="eyebrow">08 — Code Blueprint</span>
+      <h2>Complete Function & File Registry</h2>
+      <p>An exact reference table mapping every file and function across the backend and frontend codebase.</p>
+
+      <table>
+        <tr><th>File Path</th><th>Function / Symbol</th><th>Signature & Description</th></tr>
+        <tr><td><code>run.py</code></td><td><code>check_tesseract()</code></td><td>Detects Windows/Linux Tesseract OCR installation paths.</td></tr>
+        <tr><td><code>run.py</code></td><td><code>check_sqlite_vec()</code></td><td>Verifies <code>sqlite-vec</code> binary extension availability.</td></tr>
+        <tr><td><code>run.py</code></td><td><code>main()</code></td><td>Executes diagnostics, calls <code>init_db()</code>, pre-warms embedding model, runs Uvicorn.</td></tr>
+        <tr><td><code>backend/main.py</code></td><td><code>POST /upload</code></td><td>Validates extension, saves file, calls <code>process_document()</code>.</td></tr>
+        <tr><td><code>backend/main.py</code></td><td><code>POST /chat</code></td><td>Executes <code>hybrid_search()</code>, groups chunks by doc, checks API key, returns search-only cards or AI answer.</td></tr>
+        <tr><td><code>backend/main.py</code></td><td><code>GET /documents</code></td><td>Lists all indexed documents with chunk counts.</td></tr>
+        <tr><td><code>backend/main.py</code></td><td><code>DELETE /documents/{id}</code></td><td>Deletes document record, cascades chunks, cleans FTS5/vec tables, removes local file.</td></tr>
+        <tr><td><code>backend/main.py</code></td><td><code>POST /settings/test</code></td><td>Fires a test ping prompt to validate configured API key.</td></tr>
+        <tr><td><code>backend/database.py</code></td><td><code>init_db()</code></td><td>Creates <code>documents</code>, <code>chunks</code>, <code>chunks_fts</code>, and <code>vec_chunks</code> tables.</td></tr>
+        <tr><td><code>backend/database.py</code></td><td><code>serialize_embedding()</code></td><td>Converts Float32 vector array to binary byte blob for SQLite storage.</td></tr>
+        <tr><td><code>backend/ingestion.py</code></td><td><code>extract_text_from_pdf()</code></td><td>Extracts text via PyMuPDF; triggers 300 DPI Tesseract OCR if text length &lt; 20.</td></tr>
+        <tr><td><code>backend/ingestion.py</code></td><td><code>chunk_text()</code></td><td>Groups sentences into ~300 word chunks with 1-sentence overlap.</td></tr>
+        <tr><td><code>backend/ingestion.py</code></td><td><code>process_document()</code></td><td>Full ingestion coordinator: extract -&gt; chunk -&gt; embed -&gt; store in SQLite.</td></tr>
+        <tr><td><code>backend/embeddings.py</code></td><td><code>embed_documents()</code></td><td>Embeds document chunks using FastEmbed <code>BAAI/bge-small-en-v1.5</code>.</td></tr>
+        <tr><td><code>backend/embeddings.py</code></td><td><code>embed_query()</code></td><td>Embeds search query with BGE search instruction prefix.</td></tr>
+        <tr><td><code>backend/search.py</code></td><td><code>search_bm25()</code></td><td>Queries SQLite FTS5 index using BM25 ranking algorithm.</td></tr>
+        <tr><td><code>backend/search.py</code></td><td><code>search_vector()</code></td><td>Queries <code>sqlite-vec</code> table or runs NumPy brute-force cosine similarity.</td></tr>
+        <tr><td><code>backend/search.py</code></td><td><code>reciprocal_rank_fusion()</code></td><td>Fuses BM25 and Vector ranks into unified RRF scores ($k=60$).</td></tr>
+        <tr><td><code>backend/search.py</code></td><td><code>hybrid_search()</code></td><td>Orchestrates hybrid retrieval and returns top <code>ChunkResult</code> objects.</td></tr>
+        <tr><td><code>backend/search.py</code></td><td><code>highlight()</code></td><td>Wraps matched query keywords in <code>**bold**</code> markdown tags.</td></tr>
+        <tr><td><code>backend/llm.py</code></td><td><code>call_llm()</code></td><td>Dispatches prompt to Anthropic, Gemini, OpenAI, or Groq API.</td></tr>
+        <tr><td><code>backend/config.py</code></td><td><code>load_config()</code> / <code>save_config()</code></td><td>Reads and persists provider configuration to <code>data/config.json</code>.</td></tr>
+        <tr><td><code>frontend/lib/api.ts</code></td><td><code>search()</code> / <code>uploadFile()</code></td><td>Client fetch wrappers connecting Next.js UI to FastAPI backend endpoints.</td></tr>
+      </table>
+    </section>
+
+    <!-- 09 -->
+    <section id="startup">
+      <span class="eyebrow">09 — Operations</span>
+      <h2>System Startup & Build Order</h2>
+      
+      <ol class="steps">
+        <li><strong>Environment Validation (`run.py`):</strong> Checks Python 3.10+, locates Tesseract executable on PATH or Windows Program Files, tests `sqlite-vec` extension import.</li>
+        <li><strong>Database Bootstrapping (`init_db()`):</strong> Enables WAL journal mode, creates tables, and builds FTS5 + vec0 virtual indexes.</li>
+        <li><strong>Model Pre-Warming (`embed_query("warmup")`):</strong> Loads ONNX `bge-small-en-v1.5` model into RAM so initial user queries execute sub-second.</li>
+        <li><strong>Server Binding:</strong> Binds Uvicorn ASGI server to local host loopback `127.0.0.1:8000`.</li>
+      </ol>
+
+      <div class="callout">
+        <strong>Command to launch Holms:</strong>
+        <pre><code>python run.py</code></pre>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+</body>
+</html>
