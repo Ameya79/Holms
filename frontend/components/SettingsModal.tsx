@@ -22,12 +22,12 @@ export default function SettingsModal({ isOpen, onClose }: Props) {
 
   useEffect(() => {
     if (isOpen) {
-      getSettings().then((cfg) => {
-        setProvider(cfg.provider || "anthropic");
-        setApiKeys((prev) => ({ ...prev, ...(cfg.api_keys || {}) }));
-      }).catch(() => {});
+      const cfg = getSettings();
+      setProvider(cfg.provider || "anthropic");
+      setApiKeys((prev) => ({ ...prev, ...(cfg.api_keys || {}) }));
     }
   }, [isOpen]);
+
 
   if (!isOpen) return null;
 
@@ -48,8 +48,9 @@ export default function SettingsModal({ isOpen, onClose }: Props) {
     setTestResult(null);
     try {
       const res = await testConnection();
-      setTestResult(res);
+      setTestResult({ success: true, message: res.response });
     } catch (err: any) {
+
       setTestResult({ success: false, message: err.message });
     } finally {
       setTesting(false);

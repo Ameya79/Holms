@@ -5,11 +5,12 @@ export interface DocResult {
   doc_id: string;
   filename: string;
   file_type: string;
-  file_size: number;
+  file_size: number | string;
   download_url: string;
   top_snippet: string;
-  matched_chunks: Array<{ chunk_id: number; snippet: string; score: number }>;
+  matched_chunks?: Array<{ chunk_id?: number; snippet?: string; text?: string; score: number }>;
 }
+
 
 export default function DocumentCard({ doc, query }: { doc: DocResult; query: string }) {
   const getBadgeColor = (type: string) => {
@@ -27,11 +28,13 @@ export default function DocumentCard({ doc, query }: { doc: DocResult; query: st
     }
   };
 
-  const formatSize = (bytes: number) => {
+  const formatSize = (bytes: number | string) => {
+    if (typeof bytes === "string") return bytes;
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
+
 
   return (
     <div className="bg-foam border border-teal/20 rounded-2xl p-5 flex flex-col justify-between hover:border-teal/40 transition-all shadow-xs">
